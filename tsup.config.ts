@@ -6,13 +6,13 @@ import pkg from "@root/package.json" assert { type: "json" }
 const dev = process.env.ENVIRONMENT === "development"
 
 const metadata = {
-	name: pkg.name,
+	name: "kemono.su links for ppixiv",
 	author: pkg.author,
 	description: pkg.description,
 	license: pkg.license,
 	version: pkg.version,
-	namespace: pkg.homepage,
-	match: pkg.homepage,
+	namespace: "https://pixiv.net",
+	match: "https://*.pixiv.net/*",
 	"run-at": "document-body",
 	icon: "https://www.google.com/s2/favicons?sz=64&domain=pixiv.net",
 	connect: ["www.patreon.com", "kemono.su"],

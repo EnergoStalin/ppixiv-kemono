@@ -1,8 +1,8 @@
 {
-  "name": "name",
-  "version": "v0.0.0",
-  "description": "description",
-  "homepage": "https://example.com",
+  "name": "ppixiv-kemono",
+  "version": "v1.4.1",
+  "description": "Add kemono.su patreon & fanbox & fantia links into ppixiv",
+  "homepage": "https://pixiv.net",
   "module": "esm",
   "type": "module",
   "engines": {
@@ -14,11 +14,12 @@
     "serve": "http-server build -c 1 -o",
     "lint": "eslint src/**/*.ts src/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts src/*.ts",
-    "release": "npm version -m 'chore(release): %s' --"
+    "release": "npm version -m 'chore(release): %s' --",
+    "postversion": "git push & git push --tags"
   },
   "keywords": [],
   "repository": {
-    "url": "https://github.com/EnergoStalin/tampermonkey-template"
+    "url": "https://github.com/EnergoStalin/ppixiv-kemono"
   },
   "author": "EnergoStalin",
   "license": "AGPL-3.0-only",
