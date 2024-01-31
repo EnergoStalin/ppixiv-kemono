@@ -5,13 +5,19 @@
 			"type": "npm",
 			"script": "dev",
 			"label": "npm: dev",
-			"detail": "rollup -c -w"
+			"detail": "rollup -c -w",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
 		},
 		{
 			"type": "npm",
 			"script": "serve",
 			"label": "npm: serve",
-			"detail": "http-server build -c 1 -o"
+			"detail": "http-server build -c 1 -o",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
 		},
 		{
 			"label": "npm: dev & serve",
@@ -30,8 +36,5 @@
 			"label": "npm: lint:fix",
 			"detail": "eslint --fix src/**/*.ts src/*.ts"
 		}
-	],
-	"problemMatcher": [
-		"$tsc-watch"
-	],
+	]
 }
