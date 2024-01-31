@@ -25,6 +25,9 @@
 				"npm: dev",
 				"npm: serve"
 			],
+			"problemMatcher": [
+				"$tsc-watch"
+			],
 			"dependsOrder": "parallel"
 		},
 		{
