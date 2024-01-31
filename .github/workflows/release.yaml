@@ -27,7 +27,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: userscript
-          path: dist/bundle.user.js
+          path: dist/index.user.js
+          if-no-files-found: error
 
   release:
     needs: build
@@ -39,4 +40,4 @@ jobs:
           name: userscript
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "bundle.user.js"
+          artifacts: "index.user.js"
