@@ -11,11 +11,12 @@ const metadata = {
 	description: pkg.description,
 	license: pkg.license,
 	version: pkg.version,
-	namespace: new URL(pkg.homepage).host.split(".").reverse().join("."),
+	namespace: pkg.homepage,
 	match: pkg.homepage,
 	"run-at": "document-body",
-	connect: [],
-	grant: [],
+	icon: "https://www.google.com/s2/favicons?sz=64&domain=pixiv.net",
+	connect: ["www.patreon.com", "kemono.su"],
+	grant: ["GM.xmlHttpRequest"],
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -38,7 +39,7 @@ export default defineConfig({
 						port: 8080,
 						metadata,
 						targets: () => true,
-				  }
+					}
 				: undefined,
 		}),
 	],
