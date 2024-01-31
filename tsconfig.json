@@ -39,10 +39,5 @@
 
 		/* Allow implicit any by default */
 		"noImplicitAny": false
-	},
-	"include": [
-		"src/*.ts",
-		"src/**/*.ts",
-		"*.ts",
-	]
+	}
 }
