@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "dev",
+			"label": "npm: dev",
+			"detail": "rollup -c -w"
+		},
+		{
+			"type": "npm",
+			"script": "serve",
+			"label": "npm: serve",
+			"detail": "http-server build -c 1 -o"
+		},
+		{
+			"label": "npm: dev & serve",
+			"dependsOn": [
+				"npm: dev",
+				"npm: serve"
+			],
+			"dependsOrder": "parallel"
+		},
+		{
+			"type": "npm",
+			"script": "lint:fix",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"label": "npm: lint:fix",
+			"detail": "eslint --fix src/**/*.ts src/*.ts"
+		}
+	],
+	"problemMatcher": [
+		"$tsc-watch"
+	],
+}

@@ -1,0 +1,37 @@
+{
+  "name": "name",
+  "version": "v0.0.0",
+  "description": "description",
+  "homepage": "https://example.com",
+  "module": "esm",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "ENVIRONMENT=development tsup --watch",
+    "build": "tsup",
+    "serve": "http-server build -c 1 -o",
+    "lint": "eslint src/**/*.ts src/*.ts",
+    "lint:fix": "eslint --fix src/**/*.ts src/*.ts",
+    "release": "npm version -m 'chore(release): %s' --"
+  },
+  "keywords": [],
+  "repository": {
+    "url": "https://github.com/EnergoStalin/tampermonkey-template"
+  },
+  "author": "EnergoStalin",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@swc/core": "^1.3.107",
+    "@types/node": "^20.11.13",
+    "@types/tampermonkey": "^4.20.4",
+    "esbuild-plugin-userscript": "^0.2.6",
+    "eslint": "^8.56.0",
+    "eslint-kit": "^10.10.0",
+    "http-server": "^14.1.1",
+    "prettier": "^3.2.4",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}
