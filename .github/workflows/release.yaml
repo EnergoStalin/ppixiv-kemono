@@ -44,4 +44,4 @@ jobs:
           name: release
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "index.user.js,README.md"
+          artifacts: "build/index.user.js,README.md"
