@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         kemono.su links for ppixiv
 // @namespace    https://www.pixiv.net/
-// @version      1.4.0
+// @version      1.4.1
 // @description  Add kemono.su buttons on ppixiv user dropdown
 // @author       EnergoStalin
 // @match        https://*.pixiv.net/*
