@@ -1,3 +1,6 @@
+![release.yml](https://github.com/EnergoStalin/ppixiv-kemono/actions/workflows/release.yaml/badge.svg)
+![lint.yml](https://github.com/EnergoStalin/ppixiv-kemono/actions/workflows/lint.yaml/badge.svg)
+
 # Features
 
 - Add [kemono.su](https://kemono.su) patreon & fanbox & fantia links into [ppixiv](https://greasyfork.org/en/scripts/370418-ppixiv-for-pixiv) user dropdown
