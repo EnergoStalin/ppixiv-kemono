@@ -1,6 +1,6 @@
 import { normalizeUrl } from "./utils"
 
-const BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[./].+){2,})/g
+const BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g
 
 const labelMatchingMap = {
 	patreon: "patreon.com",
