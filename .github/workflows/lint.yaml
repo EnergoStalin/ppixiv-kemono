@@ -1,9 +1,7 @@
 on:
-  pull_request:
-    types: ["opened", "ready_for_review", "review_requested"]
-    branches: ["master"]
   push:
-    branches: ["master"]
+    paths:
+      - **.ts
 
 jobs:
   lint:
