@@ -12,10 +12,10 @@ const addUserLinks: typeof unsafeWindow.vviewHooks.addUserLinks = ({
 	for (const link of [...extraLinks, ...getLinksFromDescription(extraLinks)]) {
 		switch (link.label) {
 			case "Fanbox":
-				fanbox(toBeChecked, userInfo)
+				fanbox(toBeChecked, userInfo.userId)
 				break
 			case "patreon.com":
-				patreon(link, toBeChecked, userInfo)
+				patreon(link, toBeChecked, userInfo.userId)
 				break
 			case "fantia.jp":
 				fantia(link, toBeChecked)
@@ -24,7 +24,9 @@ const addUserLinks: typeof unsafeWindow.vviewHooks.addUserLinks = ({
 		}
 	}
 
-	extraLinks.push(...disableDeadLinks(toBeChecked, userInfo))
+	const discoveredLinks = disableDeadLinks(toBeChecked, userInfo)
+
+	extraLinks.push(...discoveredLinks)
 }
 
 unsafeWindow.vviewHooks = {

@@ -21,7 +21,7 @@ const cachedPatreonUsers = {}
 export function patreon(
 	link: UserLink,
 	extraLinks: UserLink[],
-	userInfo: User,
+	userId: number,
 ) {
 	normalizePatreonLink(link)
 	const url = link.url.toString()
@@ -30,7 +30,7 @@ export function patreon(
 		ripPatreonId(url)
 			.then((id) => {
 				cachedPatreonUsers[url] = id
-				notifyUserUpdated(userInfo.userId)
+				notifyUserUpdated(userId)
 			})
 			.catch(console.error)
 	} else {
