@@ -47,3 +47,12 @@ export function removeDuplicates(links: UserLink[], extraLinks: UserLink[]) {
 export function notifyUserUpdated(userId: number) {
 	unsafeWindow.ppixiv.userCache.callUserModifiedCallbacks(userId)
 }
+
+
+export function notifyUserUpdatedForCurrentIllustration() {
+	notifyUserUpdated(getMediaInfoForCurrentIllustration()?.userId)
+}
+
+export function getMediaInfoForCurrentIllustration() {
+	return unsafeWindow.ppixiv.mediaCache._mediaInfo[unsafeWindow.ppixiv.app._screenIllust.currentMediaId]
+}
