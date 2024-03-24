@@ -31,10 +31,12 @@ export function getLinksFromDescription(extraLinks: UserLink[]) {
 		innerText: string
 	}
 
+	// eslint-disable-next-line unicorn/prefer-dom-node-text-content
+	const normalized = desc.innerText.replaceAll(/\/\s+/g, "/")
+
 	return removeDuplicates(
 		preprocessMatches(
-			// eslint-disable-next-line unicorn/prefer-dom-node-text-content
-			Array.from(desc.innerText.matchAll(BODY_LINK_REGEX)).map((e) => e[1]!),
+			Array.from(normalized.matchAll(BODY_LINK_REGEX)).map((e) => e[1]!),
 		).filter((e) => e) as UserLink[],
 		extraLinks,
 	)
