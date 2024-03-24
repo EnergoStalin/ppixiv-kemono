@@ -14,12 +14,15 @@ declare interface Window {
 	ppixiv: {
 		userCache: {
 			callUserModifiedCallbacks: (id: number) => void
-		},
+		}
 		mediaCache: {
-			_mediaInfo: Map<string, {
-				userId: string
-			}>
-		},
+			_mediaInfo: Map<
+				string,
+				{
+					userId: string
+				}
+			>
+		}
 		app: {
 			_screenIllust: {
 				currentMediaId: string
@@ -28,6 +31,9 @@ declare interface Window {
 	}
 	vviewHooks: {
 		addUserLinks?: (args: { extraLinks: UserLink[]; userInfo: User }) => void
-		dropdownMenuOptions?: ({ moreOptionsDropdown: any, sharedOptions: any }) => void
+		dropdownMenuOptions?: ({
+			moreOptionsDropdown: any,
+			sharedOptions: any,
+		}) => void
 	}
 }

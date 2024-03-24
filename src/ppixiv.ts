@@ -1,5 +1,6 @@
 import { normalizeUrl } from "./utils"
 
+// eslint-disable-next-line no-useless-escape
 const BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g
 
 const labelMatchingMap = {
@@ -48,11 +49,12 @@ export function notifyUserUpdated(userId: number) {
 	unsafeWindow.ppixiv.userCache.callUserModifiedCallbacks(userId)
 }
 
-
 export function notifyUserUpdatedForCurrentIllustration() {
 	notifyUserUpdated(getMediaInfoForCurrentIllustration()?.userId)
 }
 
 export function getMediaInfoForCurrentIllustration() {
-	return unsafeWindow.ppixiv.mediaCache._mediaInfo[unsafeWindow.ppixiv.app._screenIllust.currentMediaId]
+	return unsafeWindow.ppixiv.mediaCache._mediaInfo[
+		unsafeWindow.ppixiv.app._screenIllust.currentMediaId
+	]
 }
