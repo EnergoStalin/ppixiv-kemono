@@ -3,7 +3,7 @@ export function fantia(link: UserLink, extraLinks: UserLink[]) {
 	extraLinks.push({
 		url: new URL(`https://kemono.su/fantia/user/${id}`),
 		icon: "mat:money_off",
-		type: "kemono_fantia",
+		type: `kemono_fantia#${id}`,
 		label: "Kemono fantia",
 	})
 }

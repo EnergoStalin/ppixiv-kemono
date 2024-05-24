@@ -37,8 +37,8 @@ export function patreon(
 		extraLinks.push({
 			url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
 			icon: "mat:money_off",
-			type: "kemono_patreon",
-			label: "Kemono patreon",
+			type: `kemono_patreon#${cachedId}`,
+			label: `Kemono patreon`,
 		})
 	}
 }
