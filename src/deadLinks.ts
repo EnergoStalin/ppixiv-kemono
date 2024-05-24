@@ -1,6 +1,6 @@
 import { notifyUserUpdated } from "./ppixiv"
 
-function fastHash(str) {
+function fastHash(str: string) {
 	let hash = 0
 	if (str.length === 0) return hash
 	for (let i = 0; i < str.length; i++) {
@@ -10,7 +10,7 @@ function fastHash(str) {
 }
 
 const cachedRedirects = {}
-async function cacheRedirect(url) {
+async function cacheRedirect(url: string) {
 	const response = await GM.xmlHttpRequest({
 		method: "GET",
 		redirect: "manual",
@@ -21,7 +21,7 @@ async function cacheRedirect(url) {
 }
 
 const pending = new Set()
-export function disableDeadLinks(links, userInfo) {
+export function disableDeadLinks(links: UserLink[], userInfo: User) {
 	const hash = fastHash(JSON.stringify(links))
 
 	if (!pending.has(hash)) {
