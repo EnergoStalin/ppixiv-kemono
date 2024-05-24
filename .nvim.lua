@@ -4,6 +4,27 @@ overseer.register_template({
 	name = 'dev',
 	builder = function()
 		return {
+			cmd = '',
+			components = {
+				'unique',
+				{
+					'dependencies',
+					task_names = {
+						'watch',
+						'serve',
+						{'shell', cmd = 'sleep 2 && firefox ./build/index.proxy.user.js'},
+					},
+					sequential = false,
+				}
+			},
+		}
+	end,
+})
+
+overseer.register_template({
+	name = 'watch',
+	builder = function()
+		return {
 			cmd = 'pnpm dev',
 			components = { 'unique' },
 		}
@@ -15,7 +36,9 @@ overseer.register_template({
 	builder = function()
 		return {
 			cmd = 'pnpm serve',
-			components = { 'unique' },
+			components = {
+				'unique',
+			}
 		}
 	end,
 })
@@ -39,22 +62,23 @@ overseer.register_template({
 	},
 })
 
-
-local buildninstall = overseer.new_task({
-	name = 'Build and install',
-	components = { 'unique' },
-	strategy = {
-		'orchestrator',
-		tasks = {
-			{ 'shell', cmd = 'pnpm build' },
-			{ 'shell', cmd = 'firefox ./build/index.user.js' },
-		},
-	}
+overseer.register_template({
+	name = 'Install release',
+	builder = function()
+		return {
+			cmd = '',
+			components = {
+				'unique',
+				{
+					'dependencies',
+					task_names = {
+						{'shell', cmd = 'pnpm build'},
+						{'shell', cmd = 'firefox ./build/index.user.js'},
+					}
+				}
+			}
+		}
+	end,
 })
 
 overseer.run_template({ name = 'dev' })
-overseer.run_template({ name = 'serve' })
-
-overseer.new_task({ name = 'install', cmd = 'sleep 2 && firefox ./build/index.proxy.user.js' }):start()
-
-vim.api.nvim_create_user_command('BuildAndInstall', function() buildninstall:start() end, {})
