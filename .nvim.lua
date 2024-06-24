@@ -4,52 +4,25 @@ overseer.register_template({
 	name = 'dev',
 	builder = function()
 		return {
-			cmd = '',
-			components = {
-				'unique',
-				{
-					'dependencies',
-					task_names = {
-						'watch',
-						'serve',
-						{'shell', cmd = 'sleep 2 && firefox ./build/index.proxy.user.js'},
-					},
-					sequential = false,
+			name = 'Development',
+			strategy = {
+				'orchestrator',
+				tasks = {
+					'pnpm dev',
+					'pnpm serve',
+					{ 'shell', cmd = 'sleep 2 && firefox ./build/index.proxy.user.js' },
 				}
+			},
+			components = {
+				'default',
+				'unique',
 			},
 		}
 	end,
 })
 
 overseer.register_template({
-	name = 'watch',
-	builder = function()
-		return {
-			cmd = 'pnpm dev',
-			components = { 'unique' },
-		}
-	end,
-})
-
-overseer.register_template({
-	name = 'serve',
-	builder = function()
-		return {
-			cmd = 'pnpm serve',
-			components = {
-				'unique',
-			}
-		}
-	end,
-})
-
-overseer.register_template({
 	name = 'release',
-	builder = function(params)
-		return {
-			cmd = 'pnpm release ' .. params.version,
-		}
-	end,
 	params = {
 		version = {
 			type = 'string',
@@ -60,22 +33,29 @@ overseer.register_template({
 			).version
 		},
 	},
+	builder = function(p)
+		return {
+			cmd = 'pnpm release ' .. p.version,
+		}
+	end,
 })
 
 overseer.register_template({
 	name = 'Install release',
 	builder = function()
 		return {
-			cmd = '',
-			components = {
-				'unique',
-				{
-					'dependencies',
-					task_names = {
-						{'shell', cmd = 'pnpm build'},
-						{'shell', cmd = 'firefox ./build/index.user.js'},
-					}
+			name = 'Install local release',
+			strategy = {
+				'orchestrator',
+				tasks = {
+					{ 'pnpm build' },
+					{ 'shell', cmd = 'firefox ./build/index.user.js' },
 				}
+			},
+			components = {
+				{ 'on_complete_dispose', require_view = { 'FAILURE' }, timeout = 10 },
+				'on_exit_set_status',
+				'unique',
 			}
 		}
 	end,
