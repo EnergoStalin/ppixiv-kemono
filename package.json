@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "ENVIRONMENT=development tsup --watch",
     "build": "tsup",
-    "serve": "http-server build -c 1 -o",
+    "serve": "http-server build -a 127.0.0.1 -d false -i false -c-1 -o index.proxy.user.js",
     "lint": "eslint src/**/*.ts src/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts src/*.ts",
     "release": "npm version -m 'chore(release): %s' --",

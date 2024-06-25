@@ -5,17 +5,17 @@ overseer.register_template({
 	builder = function()
 		return {
 			name = 'Development',
-			strategy = {
-				'orchestrator',
-				tasks = {
-					'pnpm dev',
-					'pnpm serve',
-					{ 'shell', cmd = 'sleep 2 && firefox ./build/index.proxy.user.js' },
-				}
-			},
+			strategy = { 'orchestrator', tasks = {} },
 			components = {
 				'default',
 				'unique',
+				{
+					'dependencies',
+					task_names = {
+						'pnpm dev',
+						'pnpm serve',
+					}
+				},
 			},
 		}
 	end,
@@ -49,7 +49,7 @@ overseer.register_template({
 				'orchestrator',
 				tasks = {
 					{ 'pnpm build' },
-					{ 'shell', cmd = 'firefox ./build/index.user.js' },
+					{ 'shell',     cmd = 'xdg-open ./build/index.user.js' },
 				}
 			},
 			components = {
