@@ -42,11 +42,12 @@ export function disableDeadLinks(links: UserLink[], userInfo: User) {
 	}
 
 	for (const l of links) {
-		l.disabled = true
-		if (cachedRedirects[l.url.toString()] === true) {
+		const redirect = cachedRedirects[l.url.toString()]
+		if (redirect === true) {
 			l.label += " (Redirected)"
-		} else {
-			delete l.disabled
+			l.disabled = true
+		} else if (redirect === undefined) {
+			l.disabled = true
 		}
 	}
 
