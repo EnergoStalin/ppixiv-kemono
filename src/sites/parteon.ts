@@ -14,7 +14,7 @@ async function ripPatreonId(link: string) {
 		method: "GET",
 		url: link,
 	})
-	return response.responseText.match(PATREON_ID_REGEX)![1]
+	return response.responseText.match(PATREON_ID_REGEX)?.[1] ?? "undefined"
 }
 
 const cachedPatreonUsers = {}
