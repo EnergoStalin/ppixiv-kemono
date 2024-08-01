@@ -26,8 +26,8 @@ export default defineConfig({
 	target: "es6",
 	bundle: true,
 	outDir: "build",
-	minify: !dev,
-	clean: !dev,
+	minify: dev,
+	clean: false,
 	outExtension: () => {
 		return { js: ".user.js", dts: ".user.dts" }
 	},
