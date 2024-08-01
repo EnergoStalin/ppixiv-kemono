@@ -4,7 +4,7 @@ overseer.register_template({
 	name = 'dev',
 	builder = function()
 		return {
-			name = 'Development',
+			name = 'dev',
 			strategy = { 'orchestrator', tasks = {} },
 			components = {
 				'default',
@@ -36,15 +36,18 @@ overseer.register_template({
 	builder = function(p)
 		return {
 			cmd = 'pnpm release ' .. p.version,
+			env = {
+				VERSION = p.version
+			}
 		}
 	end,
 })
 
 overseer.register_template({
-	name = 'Install release',
+	name = 'install release',
 	builder = function()
 		return {
-			name = 'Install local release',
+			name = 'install local release',
 			strategy = {
 				'orchestrator',
 				tasks = {

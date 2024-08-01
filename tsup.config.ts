@@ -10,7 +10,7 @@ const metadata = {
 	author: pkg.author,
 	description: pkg.description,
 	license: pkg.license,
-	version: pkg.version,
+	version: process.env.VERSION || pkg.version,
 	namespace: "https://pixiv.net",
 	match: "https://*.pixiv.net/*",
 	"run-at": "document-body",
