@@ -64,4 +64,19 @@ overseer.register_template({
 	end,
 })
 
+overseer.register_template({
+	name = 'install greasyfork',
+	builder = function()
+		return {
+			name = 'install remote release',
+			cmd = 'xdg-open https://update.greasyfork.org/scripts/475316/kemonosu%20links%20for%20ppixiv.user.js',
+			components = {
+				{ 'on_complete_dispose', require_view = { 'FAILURE' }, timeout = 10 },
+				'default',
+				'unique',
+			}
+		}
+	end,
+})
+
 overseer.run_template({ name = 'dev' })
