@@ -14,7 +14,7 @@
     "serve": "http-server build -a 127.0.0.1 -d false -i false -c-1 -o index.proxy.user.js",
     "lint": "eslint src/**/*.ts src/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts src/*.ts",
-    "release": "npm run build && cp -f build/index.user.js . && npm version --force -m 'chore(release): %s' --",
+    "release": "npm run build && cp -f build/index.user.js . && git add index.user.js && npm version --force -m 'chore(release): %s' --",
     "postversion": "git push & git push --tags"
   },
   "keywords": [],
