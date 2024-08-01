@@ -32,7 +32,9 @@ export function getLinksFromDescription(extraLinks: UserLink[]) {
 	}
 
 	// eslint-disable-next-line unicorn/prefer-dom-node-text-content
-	const normalized = desc.innerText.replaceAll(/\/\s+/g, "/")
+	const normalized = desc.innerText
+		.replaceAll(/\/\s+/g, "/")
+		.replaceAll("(dot)", ".")
 
 	return removeDuplicates(
 		preprocessMatches(
