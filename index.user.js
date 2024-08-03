@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.5.0
+// @version       1.5.1
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -40,7 +40,7 @@
 
   // src/kemono.ts
   function lastPostTimeFromHtml(html) {
-    const datetime = html.match(/datetime="(.+)"/);
+    const datetime = html.match(/datetime="(.+) /);
     if (!datetime)
       return "Could not determine last post datetime";
     return datetime[1];
