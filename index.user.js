@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.4.11
+// @version       1.5.0
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -37,6 +37,15 @@
       step((generator = generator.apply(__this, __arguments)).next());
     });
   };
+
+  // src/kemono.ts
+  function lastPostTimeFromHtml(html) {
+    const datetime = html.match(/datetime="(.+)"/);
+    if (!datetime)
+      return "Could not determine last post datetime";
+    return datetime[1];
+  }
+  __name(lastPostTimeFromHtml, "lastPostTimeFromHtml");
 
   // src/utils.ts
   function normalizeUrl(url) {
@@ -84,7 +93,7 @@
   }
   __name(notifyUserUpdated, "notifyUserUpdated");
 
-  // src/deadLinks.ts
+  // src/postprocessLinks.ts
   function fastHash(str) {
     let hash = 0;
     if (str.length === 0)
@@ -95,8 +104,8 @@
     return hash;
   }
   __name(fastHash, "fastHash");
-  var cachedRedirects = {};
-  function cacheRedirect(url) {
+  var cachedRequests = {};
+  function cacheRequest(url) {
     return __async(this, null, function* () {
       const response = yield GM.xmlHttpRequest({
         method: "GET",
@@ -104,16 +113,19 @@
         url
       });
       const value = response.finalUrl !== url;
-      cachedRedirects[url] = value;
+      cachedRequests[url] = {
+        redirected: value,
+        lastUpdate: lastPostTimeFromHtml(response.responseText)
+      };
     });
   }
-  __name(cacheRedirect, "cacheRedirect");
+  __name(cacheRequest, "cacheRequest");
   var pending = /* @__PURE__ */ new Set();
-  function disableDeadLinks(links, userInfo) {
+  function postprocessLinks(links, userInfo) {
     const hash = fastHash(JSON.stringify(links));
     if (!pending.has(hash)) {
       pending.add(hash);
-      Promise.all(links.filter((e) => cachedRedirects[e.url.toString()] === void 0).map((e) => cacheRedirect(e.url.toString()))).then((e) => {
+      Promise.all(links.filter((e) => cachedRequests[e.url.toString()] === void 0).map((e) => cacheRequest(e.url.toString()))).then((e) => {
         pending.delete(hash);
         if (e.length > 0) {
           notifyUserUpdated(userInfo.userId);
@@ -121,17 +133,19 @@
       }).catch(console.error);
     }
     for (const l of links) {
-      const redirect = cachedRedirects[l.url.toString()];
-      if (redirect === true) {
+      const request = cachedRequests[l.url.toString()];
+      if ((request == null ? void 0 : request.redirected) === true) {
         l.label += " (Redirected)";
         l.disabled = true;
-      } else if (redirect === void 0) {
+      } else if (request === void 0) {
         l.disabled = true;
+      } else {
+        l.label += ` (${request.lastUpdate})`;
       }
     }
     return links;
   }
-  __name(disableDeadLinks, "disableDeadLinks");
+  __name(postprocessLinks, "postprocessLinks");
 
   // src/sites/fanbox.ts
   function fanbox(extraLinks, userId) {
@@ -218,7 +232,7 @@
         default:
       }
     }
-    const discoveredLinks = disableDeadLinks(toBeChecked, userInfo);
+    const discoveredLinks = postprocessLinks(toBeChecked, userInfo);
     extraLinks.push(...discoveredLinks);
   }, "addUserLinks");
   unsafeWindow.vviewHooks = {
