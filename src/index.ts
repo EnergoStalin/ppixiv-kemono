@@ -1,4 +1,4 @@
-import { disableDeadLinks } from "./deadLinks"
+import { postprocessLinks } from "./postprocessLinks"
 import { getLinksFromDescription } from "./ppixiv"
 import { fanbox } from "./sites/fanbox"
 import { fantia } from "./sites/fantia"
@@ -24,7 +24,7 @@ const addUserLinks: typeof unsafeWindow.vviewHooks.addUserLinks = ({
 		}
 	}
 
-	const discoveredLinks = disableDeadLinks(toBeChecked, userInfo)
+	const discoveredLinks = postprocessLinks(toBeChecked, userInfo)
 
 	extraLinks.push(...discoveredLinks)
 }

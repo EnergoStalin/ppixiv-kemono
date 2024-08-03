@@ -1,3 +1,4 @@
+import { lastPostTimeFromHtml } from "./kemono"
 import { notifyUserUpdated } from "./ppixiv"
 
 function fastHash(str: string) {
@@ -9,19 +10,27 @@ function fastHash(str: string) {
 	return hash
 }
 
-const cachedRedirects = {}
-async function cacheRedirect(url: string) {
+interface CachedRequest {
+	redirected: boolean
+	lastUpdate: string | undefined
+}
+
+const cachedRequests: Record<string, CachedRequest> = {}
+async function cacheRequest(url: string) {
 	const response = await GM.xmlHttpRequest({
 		method: "GET",
 		redirect: "manual",
 		url,
 	})
 	const value = response.finalUrl !== url
-	cachedRedirects[url] = value
+	cachedRequests[url] = {
+		redirected: value,
+		lastUpdate: lastPostTimeFromHtml(response.responseText),
+	}
 }
 
 const pending = new Set()
-export function disableDeadLinks(links: UserLink[], userInfo: User) {
+export function postprocessLinks(links: UserLink[], userInfo: User) {
 	const hash = fastHash(JSON.stringify(links))
 
 	if (!pending.has(hash)) {
@@ -29,8 +38,8 @@ export function disableDeadLinks(links: UserLink[], userInfo: User) {
 
 		Promise.all(
 			links
-				.filter((e) => cachedRedirects[e.url.toString()] === undefined)
-				.map((e) => cacheRedirect(e.url.toString())),
+				.filter((e) => cachedRequests[e.url.toString()] === undefined)
+				.map((e) => cacheRequest(e.url.toString())),
 		)
 			.then((e) => {
 				pending.delete(hash)
@@ -42,12 +51,14 @@ export function disableDeadLinks(links: UserLink[], userInfo: User) {
 	}
 
 	for (const l of links) {
-		const redirect = cachedRedirects[l.url.toString()]
-		if (redirect === true) {
+		const request = cachedRequests[l.url.toString()]
+		if (request?.redirected === true) {
 			l.label += " (Redirected)"
 			l.disabled = true
-		} else if (redirect === undefined) {
+		} else if (request === undefined) {
 			l.disabled = true
+		} else {
+			l.label += ` (${request.lastUpdate})`
 		}
 	}
 
