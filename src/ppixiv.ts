@@ -7,6 +7,7 @@ const labelMatchingMap = {
 	patreon: "patreon.com",
 	fanbox: "Fanbox",
 	fantia: "fantia.jp",
+	gumroad: "gumroad.com",
 }
 
 function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
@@ -15,9 +16,7 @@ function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 			const url = new URL(normalizeUrl(e))
 			return {
 				label: labelMatchingMap[
-					Object.keys(labelMatchingMap).filter((e) =>
-						url.host.includes(e),
-					)[0]!
+					Object.keys(labelMatchingMap).find((e) => url.host.includes(e))!
 				],
 				url,
 			}

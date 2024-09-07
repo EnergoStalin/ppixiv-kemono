@@ -15,7 +15,7 @@ const metadata = {
 	match: "https://*.pixiv.net/*",
 	"run-at": "document-body",
 	icon: "https://www.google.com/s2/favicons?sz=64&domain=pixiv.net",
-	connect: ["www.patreon.com", "kemono.su"],
+	connect: ["gumroad.com", "www.patreon.com", "kemono.su"],
 	grant: ["GM.xmlHttpRequest"],
 }
 
