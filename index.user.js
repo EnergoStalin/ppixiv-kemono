@@ -3,11 +3,12 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.5.1
+// @version       1.5.2
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
 // @icon          https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
+// @connect       gumroad.com
 // @connect       www.patreon.com
 // @connect       kemono.su
 // @grant         GM.xmlHttpRequest
@@ -55,20 +56,41 @@
     return normalized;
   }
   __name(normalizeUrl, "normalizeUrl");
+  function memoize(fn) {
+    const cache = /* @__PURE__ */ new Map();
+    let mutex = false;
+    return function(onHit, userId, ...args) {
+      if (mutex)
+        return;
+      mutex = true;
+      const key = args[0];
+      if (cache.has(key)) {
+        mutex = false;
+        return onHit(cache.get(key));
+      }
+      fn.apply(this, args).then((e) => {
+        cache.set(key, e);
+        notifyUserUpdated(userId);
+        mutex = false;
+      });
+    };
+  }
+  __name(memoize, "memoize");
 
   // src/ppixiv.ts
   var BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g;
   var labelMatchingMap = {
     patreon: "patreon.com",
     fanbox: "Fanbox",
-    fantia: "fantia.jp"
+    fantia: "fantia.jp",
+    gumroad: "gumroad.com"
   };
   function preprocessMatches(matches) {
     return matches.map((e) => {
       try {
         const url = new URL(normalizeUrl(e));
         return {
-          label: labelMatchingMap[Object.keys(labelMatchingMap).filter((e2) => url.host.includes(e2))[0]],
+          label: labelMatchingMap[Object.keys(labelMatchingMap).find((e2) => url.host.includes(e2))],
           url
         };
       } catch (e2) {
@@ -170,6 +192,29 @@
   }
   __name(fantia, "fantia");
 
+  // src/sites/gumroad.ts
+  var GUMROAD_ID_REGEX = /"external_id":"(\d+)"/;
+  var ripGumroadId = memoize((link) => __async(void 0, null, function* () {
+    return GM.xmlHttpRequest({
+      method: "GET",
+      url: link
+    }).then((e) => {
+      var _a, _b;
+      return (_b = (_a = e.responseText.match(GUMROAD_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
+    });
+  }));
+  function gumroad(link, extraLinks, userId) {
+    ripGumroadId((id) => {
+      extraLinks.push({
+        url: new URL(`https://kemono.su/gumroad/user/${id}`),
+        icon: "mat:money_off",
+        type: `kemono_gumroad#{id}`,
+        label: `Kemono gumroad`
+      });
+    }, userId, link.url.toString());
+  }
+  __name(gumroad, "gumroad");
+
   // src/sites/parteon.ts
   function normalizePatreonLink(link) {
     if (typeof link.url === "string")
@@ -180,35 +225,26 @@
   }
   __name(normalizePatreonLink, "normalizePatreonLink");
   var PATREON_ID_REGEX = new RegExp('"id":\\s*"(\\d+)",[\\n\\s]*"type":\\s*"user"', "ms");
-  function ripPatreonId(link) {
-    return __async(this, null, function* () {
+  var ripPatreonId = memoize((link) => __async(void 0, null, function* () {
+    return yield GM.xmlHttpRequest({
+      method: "GET",
+      url: link
+    }).then((e) => {
       var _a, _b;
-      const response = yield GM.xmlHttpRequest({
-        method: "GET",
-        url: link
-      });
-      return (_b = (_a = response.responseText.match(PATREON_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
+      return (_b = (_a = e.responseText.match(PATREON_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
     });
-  }
-  __name(ripPatreonId, "ripPatreonId");
-  var cachedPatreonUsers = {};
+  }));
   function patreon(link, extraLinks, userId) {
     normalizePatreonLink(link);
     const url = link.url.toString();
-    const cachedId = cachedPatreonUsers[url];
-    if (!cachedId) {
-      ripPatreonId(url).then((id) => {
-        cachedPatreonUsers[url] = id;
-        notifyUserUpdated(userId);
-      }).catch(console.error);
-    } else {
+    ripPatreonId((cachedId) => {
       extraLinks.push({
         url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
         icon: "mat:money_off",
         type: `kemono_patreon#${cachedId}`,
         label: `Kemono patreon`
       });
-    }
+    }, userId, url);
   }
   __name(patreon, "patreon");
 
@@ -225,6 +261,9 @@
           break;
         case "patreon.com":
           patreon(link, toBeChecked, userInfo.userId);
+          break;
+        case "gumroad.com":
+          gumroad(link, toBeChecked, userInfo.userId);
           break;
         case "fantia.jp":
           fantia(link, toBeChecked);
