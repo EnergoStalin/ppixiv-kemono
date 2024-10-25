@@ -23,16 +23,20 @@ overseer.register_template({
 
 overseer.register_template({
 	name = 'release',
-	params = {
-		version = {
-			type = 'string',
-			default = vim.json.decode(
-				vim.fn.join(
-					vim.fn.readfile('package.json'), '\n'
-				)
-			).version
-		},
-	},
+	params = function()
+		local version = vim.json.decode(
+			vim.fn.join(
+				vim.fn.readfile('package.json'), '\n'
+			)
+		).version
+
+		return {
+			version = {
+				type = 'string',
+				default = version
+			},
+		}
+	end,
 	builder = function(p)
 		return {
 			cmd = 'pnpm release ' .. p.version,
