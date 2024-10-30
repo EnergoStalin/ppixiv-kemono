@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.5.4
+// @version       1.6.0
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -197,14 +197,19 @@
   var ripGumroadId = memoize((link) => __async(void 0, null, function* () {
     return GM.xmlHttpRequest({
       method: "GET",
+      timeout: 5e3,
       url: link
     }).then((e) => {
       var _a, _b;
       return (_b = (_a = e.responseText.match(GUMROAD_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
-    });
+    }).catch(console.error);
   }));
   function gumroad(link, extraLinks, userId) {
     ripGumroadId((id) => {
+      if (!id) {
+        link.disabled = true;
+        return;
+      }
       extraLinks.push({
         url: new URL(`https://kemono.su/gumroad/user/${id}`),
         icon: "mat:money_off",
@@ -226,18 +231,23 @@
   __name(normalizePatreonLink, "normalizePatreonLink");
   var PATREON_ID_REGEX = new RegExp('"id":\\s*"(\\d+)",[\\n\\s]*"type":\\s*"user"', "ms");
   var ripPatreonId = memoize((link) => __async(void 0, null, function* () {
-    return yield GM.xmlHttpRequest({
+    return GM.xmlHttpRequest({
       method: "GET",
+      timeout: 5e3,
       url: link
     }).then((e) => {
       var _a, _b;
       return (_b = (_a = e.responseText.match(PATREON_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
-    });
+    }).catch(console.error);
   }));
   function patreon(link, extraLinks, userId) {
     normalizePatreonLink(link);
     const url = link.url.toString();
     ripPatreonId((cachedId) => {
+      if (!cachedId) {
+        link.disabled = true;
+        return;
+      }
       extraLinks.push({
         url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
         icon: "mat:money_off",
