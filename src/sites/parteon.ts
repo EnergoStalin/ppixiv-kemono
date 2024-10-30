@@ -9,10 +9,13 @@ function normalizePatreonLink(link: UserLink) {
 
 const PATREON_ID_REGEX = /"id":\s*"(\d+)",[\n\s]*"type":\s*"user"/ms
 const ripPatreonId = memoize(async (link: string) => {
-	return await GM.xmlHttpRequest({
+	return GM.xmlHttpRequest({
 		method: "GET",
+		timeout: 5000,
 		url: link,
-	}).then((e) => e.responseText.match(PATREON_ID_REGEX)?.[1] ?? "undefined")
+	})
+		.then((e) => e.responseText.match(PATREON_ID_REGEX)?.[1] ?? "undefined")
+		.catch(console.error)
 })
 
 export function patreon(
@@ -25,6 +28,11 @@ export function patreon(
 
 	ripPatreonId(
 		(cachedId) => {
+			if (!cachedId) {
+				link.disabled = true
+				return
+			}
+
 			extraLinks.push({
 				url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
 				icon: "mat:money_off",
