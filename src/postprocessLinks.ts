@@ -1,4 +1,4 @@
-import { lastPostTimeFromHtml } from "./kemono"
+import { getCreatorData, KemonoCreator, lastPostTimeFromHtml } from "./kemono"
 import { notifyUserUpdated } from "./ppixiv"
 
 function fastHash(str: string) {
@@ -12,20 +12,21 @@ function fastHash(str: string) {
 
 interface CachedRequest {
 	redirected: boolean
-	lastUpdate: string | undefined
+	lastUpdate?: string
 }
 
 const cachedRequests: Record<string, CachedRequest> = {}
 async function cacheRequest(url: string) {
-	const response = await GM.xmlHttpRequest({
-		method: "GET",
-		redirect: "manual",
-		url,
-	})
-	const value = response.finalUrl !== url
-	cachedRequests[url] = {
-		redirected: value,
-		lastUpdate: lastPostTimeFromHtml(response.responseText),
+	try {
+		const data = await getCreatorData(url)
+		cachedRequests[url] = {
+			redirected: false,
+			lastUpdate: data.updated.split("T")[0],
+		}
+	} catch {
+		cachedRequests[url] = {
+			redirected: true,
+		}
 	}
 }
 
