@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.6.0
+// @version       1.6.1
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -40,13 +40,24 @@
   };
 
   // src/kemono.ts
-  function lastPostTimeFromHtml(html) {
-    const datetime = html.match(/datetime="(.+) /);
-    if (!datetime)
-      return "Could not determine last post datetime";
-    return datetime[1];
+  function toApiUrl(u) {
+    const url = new URL(u);
+    url.pathname = `/api/v1${url.pathname}/profile`;
+    return url.toString();
   }
-  __name(lastPostTimeFromHtml, "lastPostTimeFromHtml");
+  __name(toApiUrl, "toApiUrl");
+  function getCreatorData(u) {
+    return __async(this, null, function* () {
+      const url = toApiUrl(u);
+      const response = yield GM.xmlHttpRequest({
+        url
+      });
+      if (response.status === 404)
+        throw "Creator dont exists";
+      return JSON.parse(response.responseText);
+    });
+  }
+  __name(getCreatorData, "getCreatorData");
 
   // src/utils.ts
   function normalizeUrl(url) {
@@ -129,16 +140,17 @@
   var cachedRequests = {};
   function cacheRequest(url) {
     return __async(this, null, function* () {
-      const response = yield GM.xmlHttpRequest({
-        method: "GET",
-        redirect: "manual",
-        url
-      });
-      const value = response.finalUrl !== url;
-      cachedRequests[url] = {
-        redirected: value,
-        lastUpdate: lastPostTimeFromHtml(response.responseText)
-      };
+      try {
+        const data = yield getCreatorData(url);
+        cachedRequests[url] = {
+          redirected: false,
+          lastUpdate: data.updated.split("T")[0]
+        };
+      } catch (e) {
+        cachedRequests[url] = {
+          redirected: true
+        };
+      }
     });
   }
   __name(cacheRequest, "cacheRequest");
