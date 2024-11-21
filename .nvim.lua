@@ -84,3 +84,5 @@ overseer.register_template({
 })
 
 overseer.run_template({ name = 'dev' })
+
+vim.fn.writefile({ "pnpm build", "git add index.user.js" }, ".git/hooks/pre-commit")
