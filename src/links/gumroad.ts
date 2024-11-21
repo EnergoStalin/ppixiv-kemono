@@ -1,4 +1,5 @@
-import { memoize } from "@/utils"
+import { memoize } from "./memo"
+import { makeUrl } from "./url"
 
 const GUMROAD_ID_REGEX = /"external_id":"(\d+)"/
 const ripGumroadId = memoize(async (link: string) => {
@@ -23,12 +24,8 @@ export function gumroad(
 				return
 			}
 
-			extraLinks.push({
-				url: new URL(`https://kemono.su/gumroad/user/${id}`),
-				icon: "mat:money_off",
-				type: `kemono_gumroad#{id}`,
-				label: `Kemono gumroad`,
-			})
+			extraLinks.push(makeUrl("kemono", "gumroad", id))
+			extraLinks.push(makeUrl("nekohouse", "gumroad", id))
 		},
 		userId,
 		link.url.toString(),

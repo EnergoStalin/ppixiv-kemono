@@ -1,12 +1,5 @@
-import { notifyUserUpdated } from "./ppixiv"
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export function normalizeUrl(url: string) {
-	let normalized = url.trim()
-	if (!normalized.startsWith("http")) normalized = `https://${normalized}`
-
-	return normalized
-}
+import { notifyUserUpdated } from "@/ppixiv"
 
 type Awaitable = (...args: any[]) => Promise<any>
 type OnHit<T extends Awaitable> = (data: Awaited<ReturnType<T>>) => void

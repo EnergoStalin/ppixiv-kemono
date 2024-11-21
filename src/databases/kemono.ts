@@ -1,3 +1,5 @@
+import { CreatorData, PostData } from "./index"
+
 export interface KemonoCreator {
 	id: string
 	name: string
@@ -15,10 +17,17 @@ export function toApiUrl(u: string) {
 	return url.toString()
 }
 
-export async function getCreatorData(u: string): Promise<KemonoCreator> {
+export async function getCreatorData(u: string): Promise<CreatorData> {
 	const url = toApiUrl(u)
 	const response = await GM.xmlHttpRequest({ url })
 	if (response.status === 404) throw "Creator dont exists"
 
-	return JSON.parse(response.responseText)
+	const data: KemonoCreator = JSON.parse(response.responseText)
+	return {
+		lastUpdate: data.updated.split("T")[0],
+	}
+}
+
+export function getPostData(u: string): Promise<PostData> {
+	return getCreatorData(u)
 }

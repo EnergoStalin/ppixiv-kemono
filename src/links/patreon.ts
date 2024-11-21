@@ -1,4 +1,5 @@
-import { memoize, normalizeUrl } from "../utils"
+import { memoize } from "./memo"
+import { makeUrl, normalizeUrl } from "./url"
 
 function normalizePatreonLink(link: UserLink) {
 	if (typeof link.url === "string") link.url = new URL(normalizeUrl(link.url))
@@ -33,12 +34,8 @@ export function patreon(
 				return
 			}
 
-			extraLinks.push({
-				url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
-				icon: "mat:money_off",
-				type: `kemono_patreon#${cachedId}`,
-				label: `Kemono patreon`,
-			})
+			extraLinks.push(makeUrl("kemono", "patreon", cachedId))
+			extraLinks.push(makeUrl("nekohouse", "patreon", cachedId))
 		},
 		userId,
 		url,

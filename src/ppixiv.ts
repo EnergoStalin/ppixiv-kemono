@@ -1,4 +1,4 @@
-import { normalizeUrl } from "./utils"
+import { normalizeUrl } from "./links/url"
 
 // eslint-disable-next-line no-useless-escape
 const BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g

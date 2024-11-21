@@ -1,4 +1,4 @@
-import { getCreatorData, KemonoCreator, lastPostTimeFromHtml } from "./kemono"
+import { getCreatorData } from "./databases"
 import { notifyUserUpdated } from "./ppixiv"
 
 function fastHash(str: string) {
@@ -21,9 +21,10 @@ async function cacheRequest(url: string) {
 		const data = await getCreatorData(url)
 		cachedRequests[url] = {
 			redirected: false,
-			lastUpdate: data.updated.split("T")[0],
+			lastUpdate: data.lastUpdate,
 		}
-	} catch {
+	} catch (error) {
+		console.error(error)
 		cachedRequests[url] = {
 			redirected: true,
 		}
@@ -31,7 +32,7 @@ async function cacheRequest(url: string) {
 }
 
 const pending = new Set()
-export function postprocessLinks(links: UserLink[], userInfo: User) {
+export function checkAvalibility(links: UserLink[], userId: number) {
 	const hash = fastHash(JSON.stringify(links))
 
 	if (!pending.has(hash)) {
@@ -45,7 +46,7 @@ export function postprocessLinks(links: UserLink[], userInfo: User) {
 			.then((e) => {
 				pending.delete(hash)
 				if (e.length > 0) {
-					notifyUserUpdated(userInfo.userId)
+					notifyUserUpdated(userId)
 				}
 			})
 			.catch(console.error)
