@@ -1,4 +1,3 @@
-![release.yml](https://github.com/EnergoStalin/ppixiv-kemono/actions/workflows/release.yaml/badge.svg)
 ![lint.yml](https://github.com/EnergoStalin/ppixiv-kemono/actions/workflows/lint.yaml/badge.svg)
 
 # Preview
