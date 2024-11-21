@@ -11,4 +11,6 @@
 - Check links for redirect marking dead links (Redirected)
 - Show last post date
 
+Github [link](https://github.com/EnergoStalin/ppixiv-kemono)
+
 > :memo: Works with ppixiv v228 or higher. To install latest ppixiv version click [here](https://ppixiv.org/install).
