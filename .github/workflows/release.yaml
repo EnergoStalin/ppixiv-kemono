@@ -19,7 +19,7 @@ jobs:
           cache: pnpm
           node-version: 20.x
       - name: Build
-        run: ENVIRONMENT=development pnpm exec tsup
+        run: pnpm build
         env:
           ENVIRONMENT: ci
       - name: Upload Artifact
