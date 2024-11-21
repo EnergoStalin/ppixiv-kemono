@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.6.1
+// @version       1.7.0
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -11,6 +11,7 @@
 // @connect       gumroad.com
 // @connect       www.patreon.com
 // @connect       kemono.su
+// @connect       nekohouse.su
 // @grant         GM.xmlHttpRequest
 // ==/UserScript==
 
@@ -39,7 +40,7 @@
     });
   };
 
-  // src/kemono.ts
+  // src/databases/kemono.ts
   function toApiUrl(u) {
     const url = new URL(u);
     url.pathname = `/api/v1${url.pathname}/profile`;
@@ -52,41 +53,85 @@
       const response = yield GM.xmlHttpRequest({
         url
       });
-      if (response.status === 404)
-        throw "Creator dont exists";
-      return JSON.parse(response.responseText);
+      if (response.status === 404) throw "Creator dont exists";
+      const data = JSON.parse(response.responseText);
+      return {
+        lastUpdate: data.updated.split("T")[0]
+      };
     });
   }
   __name(getCreatorData, "getCreatorData");
+  function getPostData(u) {
+    return getCreatorData(u);
+  }
+  __name(getPostData, "getPostData");
 
-  // src/utils.ts
+  // src/databases/nekohouse.ts
+  var CREATOR_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/;
+  var POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/;
+  function fetchPage(url) {
+    return __async(this, null, function* () {
+      const response = yield GM.xmlHttpRequest({
+        method: "GET",
+        url
+      });
+      if (response.finalUrl !== url) throw new Error(`creator does not exists ${url}`);
+      return response.responseText;
+    });
+  }
+  __name(fetchPage, "fetchPage");
+  function getCreatorData2(url) {
+    return __async(this, null, function* () {
+      var _a, _b;
+      const html = yield fetchPage(url);
+      return {
+        lastUpdate: (_b = (_a = html.match(CREATOR_LAST_UPDATE_TIME_REGEX)) == null ? void 0 : _a[1]) == null ? void 0 : _b.split(" ")[0]
+      };
+    });
+  }
+  __name(getCreatorData2, "getCreatorData");
+  function getPostData2(url) {
+    return __async(this, null, function* () {
+      var _a, _b;
+      const html = yield fetchPage(url);
+      return {
+        lastUpdate: (_b = (_a = html.match(POST_LAST_UPDATE_TIME_REGEX)) == null ? void 0 : _a[1]) == null ? void 0 : _b.split(" ")[0]
+      };
+    });
+  }
+  __name(getPostData2, "getPostData");
+
+  // src/databases/index.ts
+  function getCreatorData3(url) {
+    return __async(this, null, function* () {
+      if (url.includes("kemono")) return url.includes("post") ? getPostData(url) : getCreatorData(url);
+      if (url.includes("nekohouse")) return url.includes("post") ? getPostData2(url) : getCreatorData2(url);
+      throw new Error(`unknown url ${url}`);
+    });
+  }
+  __name(getCreatorData3, "getCreatorData");
+
+  // src/links/url.ts
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+  __name(capitalize, "capitalize");
+  function makeUrl(service, site, userId, postId) {
+    const post = postId ? `/post/${postId}` : "";
+    return {
+      url: new URL(`https://${service}.su/${site}/user/${userId}/${post}`),
+      icon: "mat:money_off",
+      type: `${service}_${site}#{userId}`,
+      label: `${capitalize(service)} ${site}`
+    };
+  }
+  __name(makeUrl, "makeUrl");
   function normalizeUrl(url) {
     let normalized = url.trim();
-    if (!normalized.startsWith("http"))
-      normalized = `https://${normalized}`;
+    if (!normalized.startsWith("http")) normalized = `https://${normalized}`;
     return normalized;
   }
   __name(normalizeUrl, "normalizeUrl");
-  function memoize(fn) {
-    const cache = /* @__PURE__ */ new Map();
-    let mutex = false;
-    return function(onHit, userId, ...args) {
-      if (mutex)
-        return;
-      mutex = true;
-      const key = args[0];
-      if (cache.has(key)) {
-        mutex = false;
-        return onHit(cache.get(key));
-      }
-      fn.apply(this, args).then((e) => {
-        cache.set(key, e);
-        notifyUserUpdated(userId);
-        mutex = false;
-      });
-    };
-  }
-  __name(memoize, "memoize");
 
   // src/ppixiv.ts
   var BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g;
@@ -126,11 +171,10 @@
   }
   __name(notifyUserUpdated, "notifyUserUpdated");
 
-  // src/postprocessLinks.ts
+  // src/avalibility.ts
   function fastHash(str) {
     let hash = 0;
-    if (str.length === 0)
-      return hash;
+    if (str.length === 0) return hash;
     for (let i = 0; i < str.length; i++) {
       hash += str.charCodeAt(i);
     }
@@ -141,12 +185,13 @@
   function cacheRequest(url) {
     return __async(this, null, function* () {
       try {
-        const data = yield getCreatorData(url);
+        const data = yield getCreatorData3(url);
         cachedRequests[url] = {
           redirected: false,
-          lastUpdate: data.updated.split("T")[0]
+          lastUpdate: data.lastUpdate
         };
-      } catch (e) {
+      } catch (error) {
+        console.error(error);
         cachedRequests[url] = {
           redirected: true
         };
@@ -155,14 +200,14 @@
   }
   __name(cacheRequest, "cacheRequest");
   var pending = /* @__PURE__ */ new Set();
-  function postprocessLinks(links, userInfo) {
+  function checkAvalibility(links, userId) {
     const hash = fastHash(JSON.stringify(links));
     if (!pending.has(hash)) {
       pending.add(hash);
       Promise.all(links.filter((e) => cachedRequests[e.url.toString()] === void 0).map((e) => cacheRequest(e.url.toString()))).then((e) => {
         pending.delete(hash);
         if (e.length > 0) {
-          notifyUserUpdated(userInfo.userId);
+          notifyUserUpdated(userId);
         }
       }).catch(console.error);
     }
@@ -179,32 +224,45 @@
     }
     return links;
   }
-  __name(postprocessLinks, "postprocessLinks");
+  __name(checkAvalibility, "checkAvalibility");
 
-  // src/sites/fanbox.ts
+  // src/links/fanbox.ts
   function fanbox(extraLinks, userId) {
-    extraLinks.push({
-      url: new URL(`https://kemono.su/fanbox/user/${userId}`),
-      icon: "mat:money_off",
-      type: `kemono_fanbox#${userId}`,
-      label: "Kemono fanbox"
-    });
+    extraLinks.push(makeUrl("kemono", "fanbox", userId));
+    extraLinks.push(makeUrl("nekohouse", "fanbox", userId));
   }
   __name(fanbox, "fanbox");
 
-  // src/sites/fantia.ts
+  // src/links/fantia.ts
   function fantia(link, extraLinks) {
     const id = link.url.toString().split("/").pop();
-    extraLinks.push({
-      url: new URL(`https://kemono.su/fantia/user/${id}`),
-      icon: "mat:money_off",
-      type: `kemono_fantia#${id}`,
-      label: "Kemono fantia"
-    });
+    extraLinks.push(makeUrl("kemono", "fantia", id));
+    extraLinks.push(makeUrl("nekohouse", "fantia", id));
   }
   __name(fantia, "fantia");
 
-  // src/sites/gumroad.ts
+  // src/links/memo.ts
+  function memoize(fn) {
+    const cache = /* @__PURE__ */ new Map();
+    let mutex = false;
+    return function(onHit, userId, ...args) {
+      if (mutex) return;
+      mutex = true;
+      const key = args[0];
+      if (cache.has(key)) {
+        mutex = false;
+        return onHit(cache.get(key));
+      }
+      fn.apply(this, args).then((e) => {
+        cache.set(key, e);
+        notifyUserUpdated(userId);
+        mutex = false;
+      });
+    };
+  }
+  __name(memoize, "memoize");
+
+  // src/links/gumroad.ts
   var GUMROAD_ID_REGEX = /"external_id":"(\d+)"/;
   var ripGumroadId = memoize((link) => __async(void 0, null, function* () {
     return GM.xmlHttpRequest({
@@ -222,23 +280,17 @@
         link.disabled = true;
         return;
       }
-      extraLinks.push({
-        url: new URL(`https://kemono.su/gumroad/user/${id}`),
-        icon: "mat:money_off",
-        type: `kemono_gumroad#{id}`,
-        label: `Kemono gumroad`
-      });
+      extraLinks.push(makeUrl("kemono", "gumroad", id));
+      extraLinks.push(makeUrl("nekohouse", "gumroad", id));
     }, userId, link.url.toString());
   }
   __name(gumroad, "gumroad");
 
-  // src/sites/parteon.ts
+  // src/links/patreon.ts
   function normalizePatreonLink(link) {
-    if (typeof link.url === "string")
-      link.url = new URL(normalizeUrl(link.url));
+    if (typeof link.url === "string") link.url = new URL(normalizeUrl(link.url));
     link.url.protocol = "https";
-    if (!link.url.host.startsWith("www."))
-      link.url.host = `www.${link.url.host}`;
+    if (!link.url.host.startsWith("www.")) link.url.host = `www.${link.url.host}`;
   }
   __name(normalizePatreonLink, "normalizePatreonLink");
   var PATREON_ID_REGEX = new RegExp('"id":\\s*"(\\d+)",[\\n\\s]*"type":\\s*"user"', "ms");
@@ -260,41 +312,44 @@
         link.disabled = true;
         return;
       }
-      extraLinks.push({
-        url: new URL(`https://kemono.su/patreon/user/${cachedId}`),
-        icon: "mat:money_off",
-        type: `kemono_patreon#${cachedId}`,
-        label: `Kemono patreon`
-      });
+      extraLinks.push(makeUrl("kemono", "patreon", cachedId));
+      extraLinks.push(makeUrl("nekohouse", "patreon", cachedId));
     }, userId, url);
   }
   __name(patreon, "patreon");
 
-  // src/index.ts
-  var addUserLinks = /* @__PURE__ */ __name(({ extraLinks, userInfo }) => {
-    const toBeChecked = [];
+  // src/links/index.ts
+  function genLinks(extraLinks, userId) {
+    const newLinks = [];
     for (const link of [
       ...extraLinks,
       ...getLinksFromDescription(extraLinks)
     ]) {
       switch (link.label) {
         case "Fanbox":
-          fanbox(toBeChecked, userInfo.userId);
+          fanbox(newLinks, userId);
           break;
         case "patreon.com":
-          patreon(link, toBeChecked, userInfo.userId);
+          patreon(link, newLinks, userId);
           break;
         case "gumroad.com":
-          gumroad(link, toBeChecked, userInfo.userId);
+          gumroad(link, newLinks, userId);
           break;
         case "fantia.jp":
-          fantia(link, toBeChecked);
+          fantia(link, newLinks);
           break;
         default:
       }
     }
-    const discoveredLinks = postprocessLinks(toBeChecked, userInfo);
-    extraLinks.push(...discoveredLinks);
+    return newLinks;
+  }
+  __name(genLinks, "genLinks");
+
+  // src/index.ts
+  var addUserLinks = /* @__PURE__ */ __name(({ extraLinks, userInfo }) => {
+    const toBeChecked = genLinks(extraLinks, userInfo.userId);
+    const reachableLinks = checkAvalibility(toBeChecked, userInfo.userId);
+    extraLinks.push(...reachableLinks);
   }, "addUserLinks");
   unsafeWindow.vviewHooks = {
     addUserLinks
