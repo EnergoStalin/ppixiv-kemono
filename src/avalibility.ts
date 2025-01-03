@@ -11,7 +11,7 @@ function fastHash(str: string) {
 }
 
 interface CachedRequest {
-	redirected: boolean
+	error?: string
 	lastUpdate?: string
 }
 
@@ -20,13 +20,12 @@ async function cacheRequest(url: string) {
 	try {
 		const data = await getCreatorData(url)
 		cachedRequests[url] = {
-			redirected: false,
 			lastUpdate: data.lastUpdate,
 		}
 	} catch (error) {
 		console.error(error)
 		cachedRequests[url] = {
-			redirected: true,
+			error: `${error}`,
 		}
 	}
 }
@@ -54,10 +53,10 @@ export function checkAvalibility(links: UserLink[], userId: number) {
 
 	for (const l of links) {
 		const request = cachedRequests[l.url.toString()]
-		if (request?.redirected === true) {
-			l.label += " (Redirected)"
+		if (request === undefined) {
 			l.disabled = true
-		} else if (request === undefined) {
+		} else if (request.error) {
+			l.label += ` (${request.error})`
 			l.disabled = true
 		} else {
 			l.label += ` (${request.lastUpdate})`

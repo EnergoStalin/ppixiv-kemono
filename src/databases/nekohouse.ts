@@ -6,9 +6,16 @@ const POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 async function fetchPage(url: string): Promise<string> {
 	const response = await GM.xmlHttpRequest({ method: "GET", url })
 	if (response.finalUrl !== url)
-		throw new Error(`creator does not exists ${url}`)
+		throw new Error(`creator does not exist ${url}`)
 
-	return response.responseText
+	switch (response.status) {
+		case 404:
+			throw new Error("creator does not exist")
+		case 200:
+			return response.responseText
+		default:
+			throw new Error(`request failed with status ${response.status}`)
+	}
 }
 
 export async function getCreatorData(url: string): Promise<CreatorData> {
