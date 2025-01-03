@@ -10,11 +10,11 @@ async function fetchPage(url: string): Promise<string> {
 
 	switch (response.status) {
 		case 404:
-			throw new Error("creator does not exist")
+			throw new Error("404")
 		case 200:
 			return response.responseText
 		default:
-			throw new Error(`request failed with status ${response.status}`)
+			throw new Error(`${response.status}`)
 	}
 }
 

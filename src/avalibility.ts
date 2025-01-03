@@ -30,6 +30,18 @@ async function cacheRequest(url: string) {
 	}
 }
 
+function clampString(s: string, max: number) {
+	let end = s.length
+	let postfix = ""
+
+	if (s.length > max) {
+		end = max - 3
+		postfix = "..."
+	}
+
+	return s.slice(0, Math.max(0, end)) + postfix
+}
+
 const pending = new Set()
 export function checkAvalibility(links: UserLink[], userId: number) {
 	const hash = fastHash(JSON.stringify(links))
@@ -56,7 +68,7 @@ export function checkAvalibility(links: UserLink[], userId: number) {
 		if (request === undefined) {
 			l.disabled = true
 		} else if (request.error) {
-			l.label += ` (${request.error})`
+			l.label += ` (${clampString(request.error, 15)})`
 			l.disabled = true
 		} else {
 			l.label += ` (${request.lastUpdate})`

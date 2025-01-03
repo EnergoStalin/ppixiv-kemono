@@ -20,7 +20,7 @@ export function toApiUrl(u: string) {
 export async function getCreatorData(u: string): Promise<CreatorData> {
 	const url = toApiUrl(u)
 	const response = await GM.xmlHttpRequest({ url })
-	if (response.status === 404) throw new Error("creator does not exist")
+	if (response.status === 404) throw new Error("404")
 
 	const data: KemonoCreator = JSON.parse(response.responseText)
 	return {
