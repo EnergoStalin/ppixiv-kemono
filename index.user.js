@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.7.7
+// @version       1.7.8
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -53,7 +53,7 @@
       const response = yield GM.xmlHttpRequest({
         url
       });
-      if (response.status === 404) throw new Error("creator does not exist");
+      if (response.status === 404) throw new Error("404");
       const data = JSON.parse(response.responseText);
       return {
         lastUpdate: data.updated.split("T")[0]
@@ -78,11 +78,11 @@
       if (response.finalUrl !== url) throw new Error(`creator does not exist ${url}`);
       switch (response.status) {
         case 404:
-          throw new Error("creator does not exist");
+          throw new Error("404");
         case 200:
           return response.responseText;
         default:
-          throw new Error(`request failed with status ${response.status}`);
+          throw new Error(`${response.status}`);
       }
     });
   }
@@ -205,6 +205,16 @@
     });
   }
   __name(cacheRequest, "cacheRequest");
+  function clampString(s, max) {
+    let end = s.length;
+    let postfix = "";
+    if (s.length > max) {
+      end = max - 3;
+      postfix = "...";
+    }
+    return s.slice(0, Math.max(0, end)) + postfix;
+  }
+  __name(clampString, "clampString");
   var pending = /* @__PURE__ */ new Set();
   function checkAvalibility(links, userId) {
     const hash = fastHash(JSON.stringify(links));
@@ -222,7 +232,7 @@
       if (request === void 0) {
         l.disabled = true;
       } else if (request.error) {
-        l.label += ` (${request.error})`;
+        l.label += ` (${clampString(request.error, 15)})`;
         l.disabled = true;
       } else {
         l.label += ` (${request.lastUpdate})`;
