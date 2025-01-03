@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.7.6
+// @version       1.7.7
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -53,7 +53,7 @@
       const response = yield GM.xmlHttpRequest({
         url
       });
-      if (response.status === 404) throw "Creator dont exists";
+      if (response.status === 404) throw new Error("creator does not exist");
       const data = JSON.parse(response.responseText);
       return {
         lastUpdate: data.updated.split("T")[0]
@@ -75,8 +75,15 @@
         method: "GET",
         url
       });
-      if (response.finalUrl !== url) throw new Error(`creator does not exists ${url}`);
-      return response.responseText;
+      if (response.finalUrl !== url) throw new Error(`creator does not exist ${url}`);
+      switch (response.status) {
+        case 404:
+          throw new Error("creator does not exist");
+        case 200:
+          return response.responseText;
+        default:
+          throw new Error(`request failed with status ${response.status}`);
+      }
     });
   }
   __name(fetchPage, "fetchPage");
@@ -187,13 +194,12 @@
       try {
         const data = yield getCreatorData3(url);
         cachedRequests[url] = {
-          redirected: false,
           lastUpdate: data.lastUpdate
         };
       } catch (error) {
         console.error(error);
         cachedRequests[url] = {
-          redirected: true
+          error: `${error}`
         };
       }
     });
@@ -213,10 +219,10 @@
     }
     for (const l of links) {
       const request = cachedRequests[l.url.toString()];
-      if ((request == null ? void 0 : request.redirected) === true) {
-        l.label += " (Redirected)";
+      if (request === void 0) {
         l.disabled = true;
-      } else if (request === void 0) {
+      } else if (request.error) {
+        l.label += ` (${request.error})`;
         l.disabled = true;
       } else {
         l.label += ` (${request.lastUpdate})`;
