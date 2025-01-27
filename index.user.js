@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.7.8
+// @version       1.8.0
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -12,6 +12,7 @@
 // @connect       www.patreon.com
 // @connect       kemono.su
 // @connect       nekohouse.su
+// @connect       t.co
 // @grant         GM.xmlHttpRequest
 // ==/UserScript==
 
@@ -146,14 +147,15 @@
     patreon: "patreon.com",
     fanbox: "Fanbox",
     fantia: "fantia.jp",
-    gumroad: "gumroad.com"
+    gumroad: "gumroad.com",
+    twitter: "t.co"
   };
   function preprocessMatches(matches) {
     return matches.map((e) => {
       try {
         const url = new URL(normalizeUrl(e));
         return {
-          label: labelMatchingMap[Object.keys(labelMatchingMap).find((e2) => url.host.includes(e2))],
+          label: labelMatchingMap[Object.entries(labelMatchingMap).find(([_, v]) => url.host.includes(v))[0]],
           url
         };
       } catch (e2) {
@@ -334,13 +336,30 @@
   }
   __name(patreon, "patreon");
 
+  // src/links/twitter.ts
+  var URL_REGEX = /URL=(.+?)"/;
+  var extractUrl = memoize((url) => __async(void 0, null, function* () {
+    return GM.xmlHttpRequest({
+      method: "GET",
+      url
+    }).then((r) => r.responseText.match(URL_REGEX)[1]).catch(console.error);
+  }));
+  function twitter(link, newLinks, userId) {
+    return __async(this, null, function* () {
+      extractUrl((url) => {
+        if (!url) return;
+        genLinks(preprocessMatches([
+          url
+        ]).filter((e) => e), userId).forEach((e) => newLinks.push(e));
+      }, userId, link.url.toString());
+    });
+  }
+  __name(twitter, "twitter");
+
   // src/links/index.ts
   function genLinks(extraLinks, userId) {
     const newLinks = [];
-    for (const link of [
-      ...extraLinks,
-      ...getLinksFromDescription(extraLinks)
-    ]) {
+    for (const link of extraLinks) {
       switch (link.label) {
         case "Fanbox":
           fanbox(newLinks, userId);
@@ -354,6 +373,9 @@
         case "fantia.jp":
           fantia(link, newLinks);
           break;
+        case "t.co":
+          twitter(link, newLinks, userId);
+          break;
         default:
       }
     }
@@ -363,7 +385,10 @@
 
   // src/index.ts
   var addUserLinks = /* @__PURE__ */ __name(({ extraLinks, userInfo }) => {
-    const toBeChecked = genLinks(extraLinks, userInfo.userId);
+    const toBeChecked = genLinks([
+      ...extraLinks,
+      ...getLinksFromDescription(extraLinks)
+    ], userInfo.userId);
     const reachableLinks = checkAvalibility(toBeChecked, userInfo.userId);
     extraLinks.push(...reachableLinks);
   }, "addUserLinks");
