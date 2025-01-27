@@ -1,4 +1,3 @@
-import { getLinksFromDescription } from "@/ppixiv"
 import { fanbox } from "./fanbox"
 import { fantia } from "./fantia"
 import { gumroad } from "./gumroad"

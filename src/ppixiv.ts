@@ -17,8 +17,8 @@ export function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 			const url = new URL(normalizeUrl(e))
 			return {
 				label: labelMatchingMap[
-					Object.entries(labelMatchingMap).find(([_, v]) =>
-						url.host.includes(v),
+					Object.entries(labelMatchingMap).find(
+						([k, v]) => url.host.includes(v) || url.host.includes(k),
 					)![0]
 				],
 				url,
