@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.0
+// @version       1.8.1
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -155,7 +155,7 @@
       try {
         const url = new URL(normalizeUrl(e));
         return {
-          label: labelMatchingMap[Object.entries(labelMatchingMap).find(([_, v]) => url.host.includes(v))[0]],
+          label: labelMatchingMap[Object.entries(labelMatchingMap).find(([k, v]) => url.host.includes(v) || url.host.includes(k))[0]],
           url
         };
       } catch (e2) {
