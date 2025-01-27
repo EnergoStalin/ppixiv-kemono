@@ -15,7 +15,13 @@ const metadata = {
 	match: "https://*.pixiv.net/*",
 	"run-at": "document-body",
 	icon: "https://www.google.com/s2/favicons?sz=64&domain=pixiv.net",
-	connect: ["gumroad.com", "www.patreon.com", "kemono.su", "nekohouse.su"],
+	connect: [
+		"gumroad.com",
+		"www.patreon.com",
+		"kemono.su",
+		"nekohouse.su",
+		"t.co",
+	],
 	grant: ["GM.xmlHttpRequest"],
 }
 
@@ -35,10 +41,10 @@ export default defineConfig({
 			metadata,
 			proxy: dev
 				? {
-						port: 8080,
-						metadata,
-						targets: () => true,
-					}
+					port: 8080,
+					metadata,
+					targets: () => true,
+				}
 				: undefined,
 		}),
 	],

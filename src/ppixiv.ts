@@ -8,15 +8,18 @@ const labelMatchingMap = {
 	fanbox: "Fanbox",
 	fantia: "fantia.jp",
 	gumroad: "gumroad.com",
+	twitter: "t.co",
 }
 
-function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
+export function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 	return matches.map((e) => {
 		try {
 			const url = new URL(normalizeUrl(e))
 			return {
 				label: labelMatchingMap[
-					Object.keys(labelMatchingMap).find((e) => url.host.includes(e))!
+					Object.entries(labelMatchingMap).find(([_, v]) =>
+						url.host.includes(v),
+					)![0]
 				],
 				url,
 			}

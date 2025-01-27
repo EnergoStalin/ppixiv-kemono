@@ -3,10 +3,11 @@ import { fanbox } from "./fanbox"
 import { fantia } from "./fantia"
 import { gumroad } from "./gumroad"
 import { patreon } from "./patreon"
+import { twitter } from "./twitter"
 
 export function genLinks(extraLinks: UserLink[], userId: number): UserLink[] {
 	const newLinks = []
-	for (const link of [...extraLinks, ...getLinksFromDescription(extraLinks)]) {
+	for (const link of extraLinks) {
 		switch (link.label) {
 			case "Fanbox":
 				fanbox(newLinks, userId)
@@ -19,6 +20,9 @@ export function genLinks(extraLinks: UserLink[], userId: number): UserLink[] {
 				break
 			case "fantia.jp":
 				fantia(link, newLinks)
+				break
+			case "t.co":
+				twitter(link, newLinks, userId)
 				break
 			default:
 		}
