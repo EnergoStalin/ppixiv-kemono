@@ -4,7 +4,7 @@ const CREATOR_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 const POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 
 async function fetchPage(url: string): Promise<string> {
-	const response = await GM.xmlHttpRequest({ method: "GET", url })
+	const response = await GM.xmlHttpRequest({ method: "HEAD", url })
 	if (response.finalUrl !== url)
 		throw new Error(`creator does not exist ${url}`)
 
@@ -12,7 +12,7 @@ async function fetchPage(url: string): Promise<string> {
 		case 404:
 			throw new Error("404")
 		case 200:
-			return response.responseText
+			return (await GM.xmlHttpRequest({ method: "GET", url })).responseText
 		default:
 			throw new Error(`${response.status}`)
 	}
