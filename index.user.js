@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.3
+// @version       1.8.4
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -74,7 +74,7 @@
   function fetchPage(url) {
     return __async(this, null, function* () {
       const response = yield GM.xmlHttpRequest({
-        method: "GET",
+        method: "HEAD",
         url
       });
       if (response.finalUrl !== url) throw new Error(`creator does not exist ${url}`);
@@ -82,7 +82,10 @@
         case 404:
           throw new Error("404");
         case 200:
-          return response.responseText;
+          return (yield GM.xmlHttpRequest({
+            method: "GET",
+            url
+          })).responseText;
         default:
           throw new Error(`${response.status}`);
       }
@@ -130,11 +133,15 @@
     return {
       url: new URL(`https://${service}.su/${site}/user/${userId}/${post}`),
       icon: "mat:money_off",
-      type: `${service}_${site}#{userId}`,
+      type: `${service}_${site}#${userId}`,
       label: `${capitalize(service)} ${site}`
     };
   }
   __name(makeUrl, "makeUrl");
+  function makeUrls(array, site, userId, postId) {
+    array.push(makeUrl("kemono", site, userId, postId), makeUrl("nekohouse", site, userId, postId));
+  }
+  __name(makeUrls, "makeUrls");
   function normalizeUrl(url) {
     let normalized = url.trim();
     if (!normalized.startsWith("http")) normalized = `https://${normalized}`;
@@ -172,8 +179,14 @@
   }
   __name(getLinksFromDescription, "getLinksFromDescription");
   function removeDuplicates(links, extraLinks) {
-    const labels = extraLinks.map((e) => e.label);
-    return links.filter((e) => !labels.includes(e.label));
+    const labels = new Set(extraLinks.map((e) => e.label));
+    const urls = /* @__PURE__ */ new Set();
+    return links.filter((e) => {
+      const url = e.url.toString();
+      if (urls.has(url) || labels.has(e.label)) return false;
+      urls.add(url);
+      return true;
+    });
   }
   __name(removeDuplicates, "removeDuplicates");
   function notifyUserUpdated(userId) {
@@ -277,22 +290,25 @@
   }));
 
   // src/links/fanbox.ts
+  var fanboxId = memoize((creatorId) => __async(void 0, null, function* () {
+    return GM.xmlHttpRequest({
+      url: `https://api.fanbox.cc/creator.get?creatorId=${creatorId}`,
+      headers: {
+        Origin: "https://fanbox.cc"
+      }
+    }).then((r) => JSON.parse(r.responseText).body.user.userId).catch(console.error);
+  }));
   function fanbox(link, extraLinks, userId) {
-    const url = new URL(link.url);
-    url.pathname = "";
-    memoizedRegexRequest((id) => {
-      const cid = id === "undefined" ? userId : id;
-      extraLinks.push(makeUrl("kemono", "fanbox", cid));
-      extraLinks.push(makeUrl("nekohouse", "fanbox", cid));
-    }, userId, url.toString(), /fanbox\/public\/images\/creator\/([0-9]+)\/cover/);
+    const creatorId = new URL(link.url).host.split(".").shift();
+    if (creatorId === "fanbox") return;
+    fanboxId((id) => makeUrls(extraLinks, "fanbox", id), userId, creatorId);
   }
   __name(fanbox, "fanbox");
 
   // src/links/fantia.ts
   function fantia(link, extraLinks) {
     const id = link.url.toString().split("/").pop();
-    extraLinks.push(makeUrl("kemono", "fantia", id));
-    extraLinks.push(makeUrl("nekohouse", "fantia", id));
+    makeUrls(extraLinks, "fantia", id);
   }
   __name(fantia, "fantia");
 
@@ -304,8 +320,7 @@
         link.disabled = true;
         return;
       }
-      extraLinks.push(makeUrl("kemono", "gumroad", id));
-      extraLinks.push(makeUrl("nekohouse", "gumroad", id));
+      makeUrls(extraLinks, "gumroad", id);
     }, userId, link.url.toString(), GUMROAD_ID_REGEX);
   }
   __name(gumroad, "gumroad");
@@ -326,8 +341,7 @@
         link.disabled = true;
         return;
       }
-      extraLinks.push(makeUrl("kemono", "patreon", id));
-      extraLinks.push(makeUrl("nekohouse", "patreon", id));
+      makeUrls(extraLinks, "patreon", id);
     }, userId, url, PATREON_ID_REGEX);
   }
   __name(patreon, "patreon");
