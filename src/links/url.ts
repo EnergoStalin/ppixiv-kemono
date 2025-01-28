@@ -19,6 +19,18 @@ export function makeUrl(
 	}
 }
 
+export function makeUrls(
+	array: UserLink[],
+	site: Site,
+	userId?: number | string,
+	postId?: number | string,
+) {
+	array.push(
+		makeUrl("kemono", site, userId, postId),
+		makeUrl("nekohouse", site, userId, postId),
+	)
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function normalizeUrl(url: string) {
 	let normalized = url.trim()
