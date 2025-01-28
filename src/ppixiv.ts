@@ -23,7 +23,7 @@ export function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 				],
 				url,
 			}
-		} catch {}
+		} catch { }
 		return undefined
 	})
 }
@@ -47,8 +47,14 @@ export function getLinksFromDescription(extraLinks: UserLink[]) {
 }
 
 export function removeDuplicates(links: UserLink[], extraLinks: UserLink[]) {
-	const labels = extraLinks.map((e) => e.label)
-	return links.filter((e) => !labels.includes(e.label))
+	const labels = new Set(extraLinks.map((e) => e.label))
+	const urls = new Set()
+	return links.filter((e) => {
+		const url = e.url.toString()
+		if (urls.has(url) || labels.has(e.label)) return false
+		urls.add(url)
+		return true
+	})
 }
 
 export function notifyUserUpdated(userId: number) {
