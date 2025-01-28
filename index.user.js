@@ -3,12 +3,13 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.1
+// @version       1.8.2
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
 // @icon          https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
 // @connect       gumroad.com
+// @connect       fanbox.cc
 // @connect       www.patreon.com
 // @connect       kemono.su
 // @connect       nekohouse.su
@@ -244,21 +245,6 @@
   }
   __name(checkAvalibility, "checkAvalibility");
 
-  // src/links/fanbox.ts
-  function fanbox(extraLinks, userId) {
-    extraLinks.push(makeUrl("kemono", "fanbox", userId));
-    extraLinks.push(makeUrl("nekohouse", "fanbox", userId));
-  }
-  __name(fanbox, "fanbox");
-
-  // src/links/fantia.ts
-  function fantia(link, extraLinks) {
-    const id = link.url.toString().split("/").pop();
-    extraLinks.push(makeUrl("kemono", "fantia", id));
-    extraLinks.push(makeUrl("nekohouse", "fantia", id));
-  }
-  __name(fantia, "fantia");
-
   // src/links/memo.ts
   function memoize(fn) {
     const cache = /* @__PURE__ */ new Map();
@@ -279,28 +265,45 @@
     };
   }
   __name(memoize, "memoize");
-
-  // src/links/gumroad.ts
-  var GUMROAD_ID_REGEX = /"external_id":"(\d+)"/;
-  var ripGumroadId = memoize((link) => __async(void 0, null, function* () {
+  var memoizedRegexRequest = memoize((url, regex, _default = "undefined") => __async(void 0, null, function* () {
     return GM.xmlHttpRequest({
       method: "GET",
       timeout: 5e3,
-      url: link
-    }).then((e) => {
+      url
+    }).then((r) => {
       var _a, _b;
-      return (_b = (_a = e.responseText.match(GUMROAD_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
+      return (_b = (_a = r.responseText.match(regex)) == null ? void 0 : _a[1]) != null ? _b : _default;
     }).catch(console.error);
   }));
+
+  // src/links/fanbox.ts
+  function fanbox(link, extraLinks, userId) {
+    memoizedRegexRequest((id) => {
+      extraLinks.push(makeUrl("kemono", "fanbox", id));
+      extraLinks.push(makeUrl("nekohouse", "fanbox", id));
+    }, userId, link.url.toString(), /fanbox\/public\/images\/creator\/([0-9]+)\/cover/);
+  }
+  __name(fanbox, "fanbox");
+
+  // src/links/fantia.ts
+  function fantia(link, extraLinks) {
+    const id = link.url.toString().split("/").pop();
+    extraLinks.push(makeUrl("kemono", "fantia", id));
+    extraLinks.push(makeUrl("nekohouse", "fantia", id));
+  }
+  __name(fantia, "fantia");
+
+  // src/links/gumroad.ts
+  var GUMROAD_ID_REGEX = /"external_id":"(\d+)"/;
   function gumroad(link, extraLinks, userId) {
-    ripGumroadId((id) => {
+    memoizedRegexRequest((id) => {
       if (!id) {
         link.disabled = true;
         return;
       }
       extraLinks.push(makeUrl("kemono", "gumroad", id));
       extraLinks.push(makeUrl("nekohouse", "gumroad", id));
-    }, userId, link.url.toString());
+    }, userId, link.url.toString(), GUMROAD_ID_REGEX);
   }
   __name(gumroad, "gumroad");
 
@@ -312,46 +315,30 @@
   }
   __name(normalizePatreonLink, "normalizePatreonLink");
   var PATREON_ID_REGEX = new RegExp('"id":\\s*"(\\d+)",[\\n\\s]*"type":\\s*"user"', "ms");
-  var ripPatreonId = memoize((link) => __async(void 0, null, function* () {
-    return GM.xmlHttpRequest({
-      method: "GET",
-      timeout: 5e3,
-      url: link
-    }).then((e) => {
-      var _a, _b;
-      return (_b = (_a = e.responseText.match(PATREON_ID_REGEX)) == null ? void 0 : _a[1]) != null ? _b : "undefined";
-    }).catch(console.error);
-  }));
   function patreon(link, extraLinks, userId) {
     normalizePatreonLink(link);
     const url = link.url.toString();
-    ripPatreonId((cachedId) => {
-      if (!cachedId) {
+    memoizedRegexRequest((id) => {
+      if (!id) {
         link.disabled = true;
         return;
       }
-      extraLinks.push(makeUrl("kemono", "patreon", cachedId));
-      extraLinks.push(makeUrl("nekohouse", "patreon", cachedId));
-    }, userId, url);
+      extraLinks.push(makeUrl("kemono", "patreon", id));
+      extraLinks.push(makeUrl("nekohouse", "patreon", id));
+    }, userId, url, PATREON_ID_REGEX);
   }
   __name(patreon, "patreon");
 
   // src/links/twitter.ts
   var URL_REGEX = /URL=(.+?)"/;
-  var extractUrl = memoize((url) => __async(void 0, null, function* () {
-    return GM.xmlHttpRequest({
-      method: "GET",
-      url
-    }).then((r) => r.responseText.match(URL_REGEX)[1]).catch(console.error);
-  }));
   function twitter(link, newLinks, userId) {
     return __async(this, null, function* () {
-      extractUrl((url) => {
+      memoizedRegexRequest((url) => {
         if (!url) return;
         genLinks(preprocessMatches([
           url
         ]).filter((e) => e), userId).forEach((e) => newLinks.push(e));
-      }, userId, link.url.toString());
+      }, userId, link.url.toString(), URL_REGEX);
     });
   }
   __name(twitter, "twitter");
@@ -362,7 +349,7 @@
     for (const link of extraLinks) {
       switch (link.label) {
         case "Fanbox":
-          fanbox(newLinks, userId);
+          fanbox(link, newLinks, userId);
           break;
         case "patreon.com":
           patreon(link, newLinks, userId);
