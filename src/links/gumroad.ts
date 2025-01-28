@@ -1,5 +1,5 @@
 import { memoizedRegexRequest } from "./memo"
-import { makeUrl } from "./url"
+import { makeUrls } from "./url"
 
 const GUMROAD_ID_REGEX = /"external_id":"(\d+)"/
 
@@ -15,8 +15,7 @@ export function gumroad(
 				return
 			}
 
-			extraLinks.push(makeUrl("kemono", "gumroad", id))
-			extraLinks.push(makeUrl("nekohouse", "gumroad", id))
+			makeUrls(extraLinks, "gumroad", id)
 		},
 		userId,
 		link.url.toString(),

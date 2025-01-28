@@ -1,5 +1,5 @@
 import { memoizedRegexRequest } from "./memo"
-import { makeUrl, normalizeUrl } from "./url"
+import { makeUrls, normalizeUrl } from "./url"
 
 function normalizePatreonLink(link: UserLink) {
 	if (typeof link.url === "string") link.url = new URL(normalizeUrl(link.url))
@@ -25,8 +25,7 @@ export function patreon(
 				return
 			}
 
-			extraLinks.push(makeUrl("kemono", "patreon", id))
-			extraLinks.push(makeUrl("nekohouse", "patreon", id))
+			makeUrls(extraLinks, "patreon", id)
 		},
 		userId,
 		url,
