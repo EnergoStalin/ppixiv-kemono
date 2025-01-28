@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.2
+// @version       1.8.3
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -278,10 +278,13 @@
 
   // src/links/fanbox.ts
   function fanbox(link, extraLinks, userId) {
+    const url = new URL(link.url);
+    url.pathname = "";
     memoizedRegexRequest((id) => {
-      extraLinks.push(makeUrl("kemono", "fanbox", id));
-      extraLinks.push(makeUrl("nekohouse", "fanbox", id));
-    }, userId, link.url.toString(), /fanbox\/public\/images\/creator\/([0-9]+)\/cover/);
+      const cid = id === "undefined" ? userId : id;
+      extraLinks.push(makeUrl("kemono", "fanbox", cid));
+      extraLinks.push(makeUrl("nekohouse", "fanbox", cid));
+    }, userId, url.toString(), /fanbox\/public\/images\/creator\/([0-9]+)\/cover/);
   }
   __name(fanbox, "fanbox");
 
