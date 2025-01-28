@@ -14,7 +14,7 @@ export function makeUrl(
 	return {
 		url: new URL(`https://${service}.su/${site}/user/${userId}/${post}`),
 		icon: "mat:money_off",
-		type: `${service}_${site}#{userId}`,
+		type: `${service}_${site}#${userId}`,
 		label: `${capitalize(service)} ${site}`,
 	}
 }
