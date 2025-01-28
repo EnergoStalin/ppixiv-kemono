@@ -9,7 +9,7 @@ export function genLinks(extraLinks: UserLink[], userId: number): UserLink[] {
 	for (const link of extraLinks) {
 		switch (link.label) {
 			case "Fanbox":
-				fanbox(newLinks, userId)
+				fanbox(link, newLinks, userId)
 				break
 			case "patreon.com":
 				patreon(link, newLinks, userId)
