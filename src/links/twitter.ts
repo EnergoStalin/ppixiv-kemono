@@ -1,24 +1,15 @@
 import { preprocessMatches } from "@/ppixiv"
 import { genLinks } from "."
-import { memoize } from "./memo"
+import { memoizedRegexRequest } from "./memo"
 
 const URL_REGEX = /URL=(.+?)"/
-
-const extractUrl = memoize(async (url: string) => {
-	return GM.xmlHttpRequest({
-		method: "GET",
-		url,
-	})
-		.then((r) => r.responseText.match(URL_REGEX)![1])
-		.catch(console.error)
-})
 
 export async function twitter(
 	link: UserLink,
 	newLinks: UserLink[],
 	userId: number,
 ) {
-	extractUrl(
+	memoizedRegexRequest(
 		(url) => {
 			if (!url) return
 			genLinks(
@@ -28,5 +19,6 @@ export async function twitter(
 		},
 		userId,
 		link.url.toString(),
+		URL_REGEX,
 	)
 }

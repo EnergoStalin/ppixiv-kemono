@@ -1,4 +1,4 @@
-import { memoize } from "./memo"
+import { memoizedRegexRequest } from "./memo"
 import { makeUrl, normalizeUrl } from "./url"
 
 function normalizePatreonLink(link: UserLink) {
@@ -9,15 +9,6 @@ function normalizePatreonLink(link: UserLink) {
 }
 
 const PATREON_ID_REGEX = /"id":\s*"(\d+)",[\n\s]*"type":\s*"user"/ms
-const ripPatreonId = memoize(async (link: string) => {
-	return GM.xmlHttpRequest({
-		method: "GET",
-		timeout: 5000,
-		url: link,
-	})
-		.then((e) => e.responseText.match(PATREON_ID_REGEX)?.[1] ?? "undefined")
-		.catch(console.error)
-})
 
 export function patreon(
 	link: UserLink,
@@ -27,17 +18,18 @@ export function patreon(
 	normalizePatreonLink(link)
 	const url = link.url.toString()
 
-	ripPatreonId(
-		(cachedId) => {
-			if (!cachedId) {
+	memoizedRegexRequest(
+		(id) => {
+			if (!id) {
 				link.disabled = true
 				return
 			}
 
-			extraLinks.push(makeUrl("kemono", "patreon", cachedId))
-			extraLinks.push(makeUrl("nekohouse", "patreon", cachedId))
+			extraLinks.push(makeUrl("kemono", "patreon", id))
+			extraLinks.push(makeUrl("nekohouse", "patreon", id))
 		},
 		userId,
 		url,
+		PATREON_ID_REGEX,
 	)
 }

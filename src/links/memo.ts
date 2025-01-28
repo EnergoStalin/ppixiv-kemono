@@ -31,3 +31,15 @@ export function memoize<T extends Awaitable>(fn: T): UserUpdateCacheHooked<T> {
 		})
 	}
 }
+
+export const memoizedRegexRequest = memoize(
+	async (url: string, regex: RegExp, _default = "undefined") => {
+		return GM.xmlHttpRequest({
+			method: "GET",
+			timeout: 5000,
+			url,
+		})
+			.then((r) => r.responseText.match(regex)?.[1] ?? _default)
+			.catch(console.error)
+	},
+)
