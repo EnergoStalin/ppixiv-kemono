@@ -28,7 +28,7 @@
     "@types/node": "^22.13.1",
     "@types/tampermonkey": "^5.0.4",
     "esbuild-plugin-userscript": "^0.2.6",
-    "eslint": "^9.20.0",
+    "eslint": "^8.57.1",
     "eslint-kit": "^11.38.0",
     "http-server": "^14.1.1",
     "prettier": "^3.5.0",
