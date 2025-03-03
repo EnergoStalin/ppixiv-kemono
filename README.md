@@ -1,5 +1,3 @@
-![lint.yml](https://github.com/EnergoStalin/ppixiv-kemono/actions/workflows/lint.yaml/badge.svg)
-
 # Preview
 
 ![preview](https://raw.githubusercontent.com/EnergoStalin/ppixiv-kemono/master/preview.png)
