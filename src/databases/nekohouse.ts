@@ -9,10 +9,10 @@ async function fetchPage(url: string): Promise<string> {
 		throw new Error(`creator does not exist ${url}`)
 
 	switch (response.status) {
-		case 404:
-			throw new Error("404")
 		case 200:
 			return (await GM.xmlHttpRequest({ method: "GET", url })).responseText
+		case 0:
+			throw new Error("Timeout")
 		default:
 			throw new Error(`${response.status}`)
 	}
