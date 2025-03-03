@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.4
+// @version       1.8.5
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -55,11 +55,18 @@
       const response = yield GM.xmlHttpRequest({
         url
       });
-      if (response.status === 404) throw new Error("404");
-      const data = JSON.parse(response.responseText);
-      return {
-        lastUpdate: data.updated.split("T")[0]
-      };
+      switch (response.status) {
+        case 200: {
+          const data = JSON.parse(response.responseText);
+          return {
+            lastUpdate: data.updated.split("T")[0]
+          };
+        }
+        case 0:
+          throw new Error("Timeout");
+        default:
+          throw new Error(`${response.status}`);
+      }
     });
   }
   __name(getCreatorData, "getCreatorData");
@@ -79,13 +86,13 @@
       });
       if (response.finalUrl !== url) throw new Error(`creator does not exist ${url}`);
       switch (response.status) {
-        case 404:
-          throw new Error("404");
         case 200:
           return (yield GM.xmlHttpRequest({
             method: "GET",
             url
           })).responseText;
+        case 0:
+          throw new Error("Timeout");
         default:
           throw new Error(`${response.status}`);
       }
