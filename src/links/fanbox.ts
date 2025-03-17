@@ -13,7 +13,12 @@ const fanboxId = memoize(async (creatorId: string) => {
 })
 
 export function fanbox(link: UserLink, extraLinks: UserLink[], userId: number) {
-	const creatorId = new URL(link.url).host.split(".").shift()
-	if (creatorId === "fanbox") return
+	const url = new URL(link.url)
+	let creatorId = url.host.split(".").shift()
+	if (creatorId && (creatorId === "fanbox" || creatorId === "www")) {
+		creatorId = url.pathname.replace(/^[/@]*/, "")
+		if (creatorId.length === 0) return
+	}
+
 	fanboxId((id) => makeUrls(extraLinks, "fanbox", id), userId, creatorId)
 }
