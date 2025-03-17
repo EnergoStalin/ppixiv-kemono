@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.5
+// @version       1.8.6
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -45,7 +45,7 @@
   // src/databases/kemono.ts
   function toApiUrl(u) {
     const url = new URL(u);
-    url.pathname = `/api/v1${url.pathname}/profile`;
+    url.pathname = `/api/v1${url.pathname.replace(/\/$/, "")}/profile`;
     return url.toString();
   }
   __name(toApiUrl, "toApiUrl");
@@ -306,8 +306,12 @@
     }).then((r) => JSON.parse(r.responseText).body.user.userId).catch(console.error);
   }));
   function fanbox(link, extraLinks, userId) {
-    const creatorId = new URL(link.url).host.split(".").shift();
-    if (creatorId === "fanbox") return;
+    const url = new URL(link.url);
+    let creatorId = url.host.split(".").shift();
+    if (creatorId && (creatorId === "fanbox" || creatorId === "www")) {
+      creatorId = url.pathname.replace(/^[/@]*/, "");
+      if (creatorId.length === 0) return;
+    }
     fanboxId((id) => makeUrls(extraLinks, "fanbox", id), userId, creatorId);
   }
   __name(fanbox, "fanbox");

@@ -1,6 +1,6 @@
 {
   "name": "ppixiv-kemono",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "description": "Add kemono.su patreon & fanbox & fantia links into ppixiv",
   "homepage": "https://pixiv.net",
   "module": "esm",
