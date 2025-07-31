@@ -4,7 +4,10 @@ const CREATOR_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 const POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 
 async function fetchPage(url: string): Promise<string> {
-	const response = await GM.xmlHttpRequest({ method: "HEAD", url })
+	let response: Tampermonkey.Response<any>
+	try { response = await GM.xmlHttpRequest({ method: "HEAD", url }) }
+	catch { response = await GM.xmlHttpRequest({ method: "GET", url }) }
+
 	if (response.finalUrl !== url)
 		throw new Error(`creator does not exist ${url}`)
 
