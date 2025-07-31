@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.7
+// @version       1.8.8
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -81,10 +81,18 @@
   var POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/;
   function fetchPage(url) {
     return __async(this, null, function* () {
-      const response = yield GM.xmlHttpRequest({
-        method: "HEAD",
-        url
-      });
+      let response;
+      try {
+        response = yield GM.xmlHttpRequest({
+          method: "HEAD",
+          url
+        });
+      } catch (e) {
+        response = yield GM.xmlHttpRequest({
+          method: "GET",
+          url
+        });
+      }
       if (response.finalUrl !== url) throw new Error(`creator does not exist ${url}`);
       switch (response.status) {
         case 200:
