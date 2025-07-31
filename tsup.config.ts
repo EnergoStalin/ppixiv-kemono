@@ -19,7 +19,7 @@ const metadata = {
 		"gumroad.com",
 		"fanbox.cc",
 		"www.patreon.com",
-		"kemono.su",
+		"kemono.cr",
 		"nekohouse.su",
 		"t.co",
 	],

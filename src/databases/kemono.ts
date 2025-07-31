@@ -12,6 +12,7 @@ export interface KemonoCreator {
 
 export function toApiUrl(u: string) {
 	const url = new URL(u)
+	url.hostname = url.hostname.replace('.su', '.cr')
 	url.pathname = `/api/v1${url.pathname.replace(/\/$/, "")}/profile`
 
 	return url.toString()
