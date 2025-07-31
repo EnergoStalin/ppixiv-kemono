@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.6
+// @version       1.8.7
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -11,7 +11,7 @@
 // @connect       gumroad.com
 // @connect       fanbox.cc
 // @connect       www.patreon.com
-// @connect       kemono.su
+// @connect       kemono.cr
 // @connect       nekohouse.su
 // @connect       t.co
 // @grant         GM.xmlHttpRequest
@@ -45,6 +45,7 @@
   // src/databases/kemono.ts
   function toApiUrl(u) {
     const url = new URL(u);
+    url.hostname = url.hostname.replace(".su", ".cr");
     url.pathname = `/api/v1${url.pathname.replace(/\/$/, "")}/profile`;
     return url.toString();
   }
