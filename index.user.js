@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.8
+// @version       1.8.9
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -352,7 +352,7 @@
     if (!link.url.host.startsWith("www.")) link.url.host = `www.${link.url.host}`;
   }
   __name(normalizePatreonLink, "normalizePatreonLink");
-  var PATREON_ID_REGEX = new RegExp('"id":\\s*"(\\d+)",[\\n\\s]*"type":\\s*"user"', "ms");
+  var PATREON_ID_REGEX = new RegExp('"creator":{"data":{"id":"(\\d+)"', "s");
   function patreon(link, extraLinks, userId) {
     normalizePatreonLink(link);
     const url = link.url.toString();
