@@ -8,7 +8,7 @@ function normalizePatreonLink(link: UserLink) {
 	if (!link.url.host.startsWith("www.")) link.url.host = `www.${link.url.host}`
 }
 
-const PATREON_ID_REGEX = /"id":\s*"(\d+)",[\n\s]*"type":\s*"user"/ms
+const PATREON_ID_REGEX = /"creator":{"data":{"id":"(\d+)"/s
 
 export function patreon(
 	link: UserLink,
