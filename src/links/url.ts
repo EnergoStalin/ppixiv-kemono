@@ -3,7 +3,7 @@ function capitalize(str: string) {
 }
 
 export type Site = "fantia" | "gumroad" | "fanbox" | "patreon"
-export type Service = "kemono" | "nekohouse"
+export type Service = "kemono.cr" | "nekohouse.su"
 export function makeUrl(
 	service: Service,
 	site: Site,
@@ -12,7 +12,7 @@ export function makeUrl(
 ) {
 	const post = postId ? `/post/${postId}` : ""
 	return {
-		url: new URL(`https://${service}.su/${site}/user/${userId}/${post}`),
+		url: new URL(`https://${service}/${site}/user/${userId}/${post}`),
 		icon: "mat:money_off",
 		type: `${service}_${site}#${userId}`,
 		label: `${capitalize(service)} ${site}`,
@@ -26,8 +26,8 @@ export function makeUrls(
 	postId?: number | string,
 ) {
 	array.push(
-		makeUrl("kemono", site, userId, postId),
-		makeUrl("nekohouse", site, userId, postId),
+		makeUrl("kemono.cr", site, userId, postId),
+		makeUrl("nekohouse.su", site, userId, postId),
 	)
 }
 
