@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.10
+// @version       1.8.11
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -54,7 +54,10 @@
     return __async(this, null, function* () {
       const url = toApiUrl(u);
       const response = yield GM.xmlHttpRequest({
-        url
+        url,
+        headers: {
+          Accept: "text/css"
+        }
       });
       switch (response.status) {
         case 200: {
