@@ -20,7 +20,7 @@ export function toApiUrl(u: string) {
 
 export async function getCreatorData(u: string): Promise<CreatorData> {
 	const url = toApiUrl(u)
-	const response = await GM.xmlHttpRequest({ url })
+	const response = await GM.xmlHttpRequest({ url, headers: { Accept: 'text/css' } })
 	switch (response.status) {
 		case 200: {
 			const data: KemonoCreator = JSON.parse(response.responseText)
