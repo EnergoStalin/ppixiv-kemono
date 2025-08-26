@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.8.11
+// @version       1.8.12
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -317,14 +317,23 @@
       }
     }).then((r) => JSON.parse(r.responseText).body.user.userId).catch(console.error);
   }));
+  function makeFanboxUrls(extraLinks, id) {
+    makeUrls(extraLinks, "fanbox", id);
+  }
+  __name(makeFanboxUrls, "makeFanboxUrls");
   function fanbox(link, extraLinks, userId) {
+    var _a;
     const url = new URL(link.url);
-    let creatorId = url.host.split(".").shift();
-    if (creatorId && (creatorId === "fanbox" || creatorId === "www")) {
-      creatorId = url.pathname.replace(/^[/@]*/, "");
-      if (creatorId.length === 0) return;
+    if (url.host.includes("pixiv.net")) {
+      makeFanboxUrls(extraLinks, (_a = url.pathname.split("/").pop()) != null ? _a : "0");
+    } else {
+      let creatorId = url.host.split(".").shift();
+      if (creatorId && (creatorId === "fanbox" || creatorId === "www")) {
+        creatorId = url.pathname.replace(/^[/@]*/, "");
+        if (creatorId.length === 0) return;
+      }
+      fanboxId((id) => makeUrls(extraLinks, "fanbox", id), userId, creatorId);
     }
-    fanboxId((id) => makeUrls(extraLinks, "fanbox", id), userId, creatorId);
   }
   __name(fanbox, "fanbox");
 
