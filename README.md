@@ -5,7 +5,8 @@
 # Features
 
 - Add [kemono.su](https://kemono.su) and [nekohouse.su](https://nekohouse.su) linking to patreon & fanbox & fantia & gumroad into [ppixiv](https://greasyfork.org/en/scripts/370418-ppixiv-for-pixiv) user dropdown
-- Check links for redirect marking dead links (Redirected)
+- Add [pawchive.st](https://pawchive.st) linking to patreon & fanbox
+- Filter out dead links
 - Show last post date
 
 Github [link](https://github.com/EnergoStalin/ppixiv-kemono)
