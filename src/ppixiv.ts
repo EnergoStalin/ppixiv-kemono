@@ -23,7 +23,7 @@ export function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 				],
 				url,
 			}
-		} catch { }
+		} catch {}
 		return undefined
 	})
 }

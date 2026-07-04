@@ -20,7 +20,7 @@ export function fanbox(link: UserLink, extraLinks: UserLink[], userId: number) {
 	const url = new URL(link.url)
 
 	if (url.host.includes("pixiv.net")) {
-		makeFanboxUrls(extraLinks, url.pathname.split('/').pop() ?? "0")
+		makeFanboxUrls(extraLinks, url.pathname.split("/").pop() ?? "0")
 	} else {
 		let creatorId = url.host.split(".").shift()
 		if (creatorId && (creatorId === "fanbox" || creatorId === "www")) {

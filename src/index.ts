@@ -1,4 +1,4 @@
-import { checkAvalibility } from "./avalibility"
+import { updateAvalibility } from "./avalibility"
 import { genLinks } from "./links"
 import { getLinksFromDescription } from "./ppixiv"
 
@@ -10,7 +10,7 @@ const addUserLinks: typeof unsafeWindow.vviewHooks.addUserLinks = ({
 		[...extraLinks, ...getLinksFromDescription(extraLinks)],
 		userInfo.userId,
 	)
-	const reachableLinks = checkAvalibility(toBeChecked, userInfo.userId)
+	const reachableLinks = updateAvalibility(toBeChecked, userInfo.userId)
 
 	extraLinks.push(...reachableLinks)
 }

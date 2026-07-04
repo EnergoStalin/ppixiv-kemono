@@ -6,14 +6,16 @@
   "module": "esm",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
-    "dev": "ENVIRONMENT=development tsup --watch",
-    "build": "tsup && cp -f build/index.user.js .",
+    "dev": "ENVIRONMENT=development tsdown --config-loader unrun --watch",
+    "build": "tsdown --config-loader unrun && cp -f build/index.user.js .",
     "serve": "http-server build -a 127.0.0.1 -d false -i false -c-1 -o index.proxy.user.js",
-    "lint": "eslint src/**/*.ts src/*.ts",
+    "lint:tsc": "eslint src/**/*.ts src/*.ts",
+    "lint:eslint": "eslint src/**/*.ts src/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts src/*.ts",
+    "lint": "npm run lint:tsc && npm run lint:eslint",
     "release": "npm run build && git add index.user.js && npm version --force -m 'chore(release): %s' --",
     "postversion": "git push & git push --tags"
   },
@@ -24,15 +26,21 @@
   "author": "EnergoStalin",
   "license": "AGPL-3.0-only",
   "devDependencies": {
-    "@swc/core": "^1.10.15",
-    "@types/node": "^22.13.1",
-    "@types/tampermonkey": "^5.0.4",
+    "@swc/core": "^1.15.43",
+    "@types/node": "^24.1.0",
+    "@types/tampermonkey": "^5.0.5",
     "esbuild-plugin-userscript": "^0.2.6",
     "eslint": "^8.57.1",
     "eslint-kit": "^11.38.0",
     "http-server": "^14.1.1",
     "prettier": "^3.5.0",
-    "tsup": "^8.3.6",
-    "typescript": "^5.7.3"
+    "tsdown": "^0.22.3",
+    "tsx": "^4.22.5",
+    "typescript": "^6.0.3",
+    "unplugin-plugin-userscript": "^0.3.1",
+    "unrun": "^0.3.1"
+  },
+  "volta": {
+    "node": "24.18.0"
   }
 }

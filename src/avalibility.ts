@@ -1,33 +1,44 @@
 import { getCreatorData } from "./databases"
 import { notifyUserUpdated } from "./ppixiv"
 
-function fastHash(str: string) {
-	let hash = 0
-	if (str.length === 0) return hash
-	for (let i = 0; i < str.length; i++) {
-		hash += str.charCodeAt(i)
-	}
-	return hash
-}
-
 interface CachedRequest {
 	error?: string
 	lastUpdate?: string
 }
 
-const cachedRequests: Record<string, CachedRequest> = {}
+const avalibilityInfo: Record<string, CachedRequest> = {}
+const pendingRequests: Set<String> = new Set()
 async function cacheRequest(url: string) {
+	pendingRequests.add(url)
 	try {
 		const data = await getCreatorData(url)
-		cachedRequests[url] = {
+		avalibilityInfo[url] = {
 			lastUpdate: data.lastUpdate,
 		}
 	} catch (error) {
-		console.error(error)
-		cachedRequests[url] = {
+		avalibilityInfo[url] = {
 			error: `${error}`,
 		}
+	} finally {
+		pendingRequests.delete(url)
 	}
+}
+
+export function updateLinks(links: UserLink[]) {
+	for (const l of links) {
+		const url = l.url.toString()
+		const request = avalibilityInfo[url]
+		if (request === undefined) {
+			l.disabled = true
+		} else if (request.error) {
+			l.label += ` (${clampString(request.error, 15)})`
+			l.disabled = true
+		} else {
+			l.label += ` (${request.lastUpdate})`
+		}
+	}
+
+	return links
 }
 
 function clampString(s: string, max: number) {
@@ -42,38 +53,22 @@ function clampString(s: string, max: number) {
 	return s.slice(0, Math.max(0, end)) + postfix
 }
 
-const pending = new Set()
-export function checkAvalibility(links: UserLink[], userId: number) {
-	const hash = fastHash(JSON.stringify(links))
+export function updateAvalibility(links: UserLink[], userId: number) {
+	const pending = links
+		.map((e) => e.url.toString())
+		.filter((url) => {
+			const request = avalibilityInfo[url]
+			return !pendingRequests.has(url) && (request === undefined || request.error !== undefined)
+		})
+		.map((url) => cacheRequest(url))
 
-	if (!pending.has(hash)) {
-		pending.add(hash)
+	Promise.all(pending)
+		.then((e) => {
+			if (e.length > 0) {
+				notifyUserUpdated(userId)
+			}
+		})
+		.catch(console.error)
 
-		Promise.all(
-			links
-				.filter((e) => cachedRequests[e.url.toString()] === undefined)
-				.map((e) => cacheRequest(e.url.toString())),
-		)
-			.then((e) => {
-				pending.delete(hash)
-				if (e.length > 0) {
-					notifyUserUpdated(userId)
-				}
-			})
-			.catch(console.error)
-	}
-
-	for (const l of links) {
-		const request = cachedRequests[l.url.toString()]
-		if (request === undefined) {
-			l.disabled = true
-		} else if (request.error) {
-			l.label += ` (${clampString(request.error, 15)})`
-			l.disabled = true
-		} else {
-			l.label += ` (${request.lastUpdate})`
-		}
-	}
-
-	return links
+	return updateLinks(links)
 }

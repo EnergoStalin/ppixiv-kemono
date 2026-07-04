@@ -6,6 +6,10 @@ import {
 	getCreatorData as getNekohouseCreatorData,
 	getPostData as getNekohousePostData,
 } from "./nekohouse"
+import {
+	getCreatorData as getPawchiveCreatorData,
+	getPostData as getPawchivePostData,
+} from "./pawchive"
 
 export interface CreatorData {
 	redirected?: boolean
@@ -22,6 +26,10 @@ export async function getCreatorData(url: string): Promise<CreatorData> {
 		return url.includes("post")
 			? getNekohousePostData(url)
 			: getNekohouseCreatorData(url)
+	if (url.includes("pawchive"))
+		return url.includes("post")
+			? getPawchiveCreatorData(url)
+			: getPawchivePostData(url)
 
 	throw new Error(`unknown url ${url}`)
 }

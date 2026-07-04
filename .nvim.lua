@@ -1,27 +1,6 @@
 local overseer = require('overseer')
 
 overseer.register_template({
-	name = 'dev',
-	builder = function()
-		return {
-			name = 'dev',
-			strategy = { 'orchestrator', tasks = {} },
-			components = {
-				'default',
-				'unique',
-				{
-					'dependencies',
-					task_names = {
-						'pnpm dev',
-						'pnpm serve',
-					}
-				},
-			},
-		}
-	end,
-})
-
-overseer.register_template({
 	name = 'release',
 	params = function()
 		local version = vim.json.decode(
@@ -33,7 +12,7 @@ overseer.register_template({
 		return {
 			version = {
 				type = 'string',
-				default = version
+				desc = version,
 			},
 		}
 	end,
@@ -83,6 +62,7 @@ overseer.register_template({
 	end,
 })
 
-overseer.run_template({ name = 'dev' })
+overseer.run_task({ name = 'pnpm dev (ppixiv-kemono)' })
+overseer.run_task({ name = 'pnpm serve (ppixiv-kemono)' })
 
 vim.fn.writefile({ "pnpm build", "git add index.user.js" }, ".git/hooks/pre-commit")

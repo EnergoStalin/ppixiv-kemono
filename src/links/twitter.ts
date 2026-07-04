@@ -9,8 +9,15 @@ export async function twitter(
 	newLinks: UserLink[],
 	userId: number,
 ) {
+	let u = link.url.toString()
+
+	if (u.includes("twitter") && !u.includes(".com"))
+		u = u.replace("twitter", "twitter.com")
+
+	link.url = u
+
 	memoizedRegexRequest(
-		(url) => {
+		(url: string | undefined) => {
 			if (!url) return
 			genLinks(
 				preprocessMatches([url]).filter((e) => e) as unknown as UserLink[],
@@ -18,7 +25,7 @@ export async function twitter(
 			).forEach((e) => newLinks.push(e))
 		},
 		userId,
-		link.url.toString(),
-		URL_REGEX,
+		u,
+		[URL_REGEX],
 	)
 }

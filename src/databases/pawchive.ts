@@ -1,6 +1,6 @@
 import { CreatorData, PostData } from "./index"
 
-export interface KemonoCreator {
+export interface PawchiveCreator {
 	id: string
 	name: string
 	service: string
@@ -12,7 +12,6 @@ export interface KemonoCreator {
 
 export function toApiUrl(u: string) {
 	const url = new URL(u)
-	url.hostname = url.hostname.replace(".su", ".cr")
 	url.pathname = `/api/v1${url.pathname.replace(/\/$/, "")}/profile`
 
 	return url.toString()
@@ -27,7 +26,7 @@ export async function getCreatorData(u: string): Promise<CreatorData> {
 	})
 	switch (response.status) {
 		case 200: {
-			const data: KemonoCreator = JSON.parse(response.responseText)
+			const data: PawchiveCreator = JSON.parse(response.responseText)
 			return {
 				lastUpdate: data.updated.split("T")[0],
 			}

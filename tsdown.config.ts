@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
-import { userscript } from "esbuild-plugin-userscript"
-import { defineConfig } from "tsup"
-import pkg from "@root/package.json" assert { type: "json" }
+import { userscript } from "unplugin-plugin-userscript/rolldown"
+import { defineConfig } from "tsdown"
+import pkg from "@root/package.json" with { type: "json" }
 
 const dev = process.env.ENVIRONMENT === "development"
 
@@ -20,8 +20,10 @@ const metadata = {
 		"fanbox.cc",
 		"www.patreon.com",
 		"kemono.cr",
+		"pawchive.pw",
 		"nekohouse.su",
 		"t.co",
+		"twitter.com",
 	],
 	grant: ["GM.xmlHttpRequest"],
 }
@@ -29,15 +31,15 @@ const metadata = {
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
 	entry: ["src/index.ts"],
-	format: "iife",
+	format: "esm",
 	target: "es6",
-	bundle: true,
 	outDir: "build",
+	platform: "browser",
 	clean: false,
-	outExtension: () => {
+	outExtensions: () => {
 		return { js: ".user.js", dts: ".user.dts" }
 	},
-	esbuildPlugins: [
+	plugins: [
 		userscript({
 			metadata,
 			proxy: dev

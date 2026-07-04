@@ -14,14 +14,17 @@ export function memoize<T extends Awaitable>(fn: T): UserUpdateCacheHooked<T> {
 	const cache = new Map()
 	let mutex = false
 
-	return function (onHit, userId, ...args) {
+	return function (this: unknown, onHit, userId, ...args) {
 		if (mutex) return
 		mutex = true
 
 		const key = args[0]
 		if (cache.has(key)) {
 			mutex = false
-			return onHit(cache.get(key))
+			const entry = cache.get(key)
+			if (entry !== undefined) {
+				return onHit(entry)
+			}
 		}
 
 		fn.apply(this, args).then((e: any) => {
@@ -32,14 +35,23 @@ export function memoize<T extends Awaitable>(fn: T): UserUpdateCacheHooked<T> {
 	}
 }
 
+function anyFirstMatch(text: string, regexes: RegExp[]) {
+	for(const r of regexes) {
+		const match = text.match(r)?.[1]
+		if (match) return match
+	}
+
+	return undefined
+}
+
 export const memoizedRegexRequest = memoize(
-	async (url: string, regex: RegExp, _default = "undefined") => {
+	async (url: string, regexes: RegExp[], _default = "undefined") => {
 		return GM.xmlHttpRequest({
 			method: "GET",
 			timeout: 5000,
 			url,
 		})
-			.then((r) => r.responseText.match(regex)?.[1] ?? _default)
-			.catch(console.error)
+			.then((r) => anyFirstMatch(r.responseText, regexes) ?? _default)
+			.catch(console.log)
 	},
 )

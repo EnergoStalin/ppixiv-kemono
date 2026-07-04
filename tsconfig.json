@@ -11,9 +11,8 @@
 		"moduleResolution": "Bundler",
 		"moduleDetection": "force",
 		"allowSyntheticDefaultImports": true,
-		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"],
+			"@/*": ["./src/*"],
 			"@root/*": ["./*"]
 		},
 
@@ -33,6 +32,7 @@
 		"noImplicitReturns": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
+		"types": ["@types/node", "@types/tampermonkey"],
 
 		/* Completeness */
 		"skipLibCheck": true,

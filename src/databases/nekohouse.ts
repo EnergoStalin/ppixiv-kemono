@@ -3,26 +3,34 @@ import { CreatorData, PostData } from "."
 const CREATOR_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 const POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 
-async function fetchPage(url: string): Promise<string> {
+const REQUEST_TIMEOUT = 5000
+
+async function fetchPage(url: string, timeout: number): Promise<string> {
+	const commonOptions = { url, timeout }
 	let response: Tampermonkey.Response<any>
-	try { response = await GM.xmlHttpRequest({ method: "HEAD", url }) }
-	catch { response = await GM.xmlHttpRequest({ method: "GET", url }) }
+	let timeouted: boolean = false
+	try {
+		response = await GM.xmlHttpRequest({ method: "HEAD", ...commonOptions, context: { refetch: true }, ontimeout: () => (timeouted = true) })
 
-	if (response.finalUrl !== url)
-		throw new Error(`creator does not exist ${url}`)
+		if (response.finalUrl !== url)
+			throw new Error(`creator does not exist ${url}`)
 
-	switch (response.status) {
-		case 200:
-			return (await GM.xmlHttpRequest({ method: "GET", url })).responseText
-		case 0:
-			throw new Error("Timeout")
-		default:
-			throw new Error(`${response.status}`)
+		switch (response.status) {
+			case 200:
+				return response.context?.refetch ? (await GM.xmlHttpRequest({ method: "GET", ...commonOptions })).responseText : response.responseText
+			case 0:
+				throw new Error("Timeout")
+			default:
+				throw new Error(`${response.status}`)
+		}
+	} catch (error) {
+		if (timeouted) throw new Error("Timeout")
+		throw error
 	}
 }
 
 export async function getCreatorData(url: string): Promise<CreatorData> {
-	const html = await fetchPage(url)
+	const html = await fetchPage(url, REQUEST_TIMEOUT)
 
 	return {
 		lastUpdate: html
@@ -32,7 +40,7 @@ export async function getCreatorData(url: string): Promise<CreatorData> {
 }
 
 export async function getPostData(url: string): Promise<PostData> {
-	const html = await fetchPage(url)
+	const html = await fetchPage(url, REQUEST_TIMEOUT)
 
 	return {
 		lastUpdate: html.match(POST_LAST_UPDATE_TIME_REGEX)?.[1]?.split(" ")[0],
