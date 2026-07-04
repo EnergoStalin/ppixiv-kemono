@@ -4,7 +4,7 @@
 
 # Features
 
-- Add [kemono.su](https://kemono.su) and [nekohouse.su](https://nekohouse.su) linking to patreon & fanbox & fantia & gumroad into [ppixiv](https://greasyfork.org/en/scripts/370418-ppixiv-for-pixiv) user dropdown
+- Add [kemono.cr](https://kemono.su) and [nekohouse.su](https://nekohouse.su) linking to patreon & fanbox & fantia & gumroad into [ppixiv](https://greasyfork.org/en/scripts/370418-ppixiv-for-pixiv) user dropdown
 - Add [pawchive.st](https://pawchive.st) linking to patreon & fanbox
 - Filter out dead links
 - Show last post date
