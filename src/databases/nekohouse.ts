@@ -8,16 +8,24 @@ const REQUEST_TIMEOUT = 5000
 async function fetchPage(url: string, timeout: number): Promise<string> {
 	const commonOptions = { url, timeout }
 	let response: Tampermonkey.Response<any>
-	let timeouted: boolean = false
+	let timeouted = false
 	try {
-		response = await GM.xmlHttpRequest({ method: "HEAD", ...commonOptions, context: { refetch: true }, ontimeout: () => (timeouted = true) })
+		response = await GM.xmlHttpRequest({
+			method: "HEAD",
+			...commonOptions,
+			context: { refetch: true },
+			ontimeout: () => (timeouted = true),
+		})
 
 		if (response.finalUrl !== url)
 			throw new Error(`creator does not exist ${url}`)
 
 		switch (response.status) {
 			case 200:
-				return response.context?.refetch ? (await GM.xmlHttpRequest({ method: "GET", ...commonOptions })).responseText : response.responseText
+				return response.context?.refetch
+					? (await GM.xmlHttpRequest({ method: "GET", ...commonOptions }))
+							.responseText
+					: response.responseText
 			case 0:
 				throw new Error("Timeout")
 			default:

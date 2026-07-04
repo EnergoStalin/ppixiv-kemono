@@ -10,7 +10,7 @@ function normalizePatreonLink(link: UserLink) {
 
 const PATREON_ID_REGEXES = [
 	/"creator":{"data":{"id":"(\d+)"/s,
-	/https:\/\/www\.patreon\.com\/api\/user\/(\d+)/s
+	/https:\/\/www\.patreon\.com\/api\/user\/(\d+)/s,
 ]
 
 export function patreon(

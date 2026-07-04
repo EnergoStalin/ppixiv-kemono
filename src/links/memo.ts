@@ -36,7 +36,7 @@ export function memoize<T extends Awaitable>(fn: T): UserUpdateCacheHooked<T> {
 }
 
 function anyFirstMatch(text: string, regexes: RegExp[]) {
-	for(const r of regexes) {
+	for (const r of regexes) {
 		const match = text.match(r)?.[1]
 		if (match) return match
 	}

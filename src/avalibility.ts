@@ -7,7 +7,7 @@ interface CachedRequest {
 }
 
 const avalibilityInfo: Record<string, CachedRequest> = {}
-const pendingRequests: Set<String> = new Set()
+const pendingRequests: Set<string> = new Set()
 async function cacheRequest(url: string) {
 	pendingRequests.add(url)
 	try {
@@ -58,7 +58,10 @@ export function updateAvalibility(links: UserLink[], userId: number) {
 		.map((e) => e.url.toString())
 		.filter((url) => {
 			const request = avalibilityInfo[url]
-			return !pendingRequests.has(url) && (request === undefined || request.error !== undefined)
+			return (
+				!pendingRequests.has(url) &&
+				(request === undefined || request.error !== undefined)
+			)
 		})
 		.map((url) => cacheRequest(url))
 

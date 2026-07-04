@@ -23,7 +23,7 @@ export async function getCreatorData(u: string): Promise<CreatorData> {
 	const response = await GM.xmlHttpRequest({
 		url,
 		headers: { Accept: "text/css" },
-		timeout: 5000
+		timeout: 5000,
 	})
 	switch (response.status) {
 		case 200: {
