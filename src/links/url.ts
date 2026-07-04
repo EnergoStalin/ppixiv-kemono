@@ -28,8 +28,9 @@ export function makeUrls(
 	array.push(
 		makeUrl("kemono.cr", site, userId, postId),
 		makeUrl("nekohouse.su", site, userId, postId),
-		makeUrl("pawchive.pw", site, userId, postId),
 	)
+	if (["fanbox", "patreon"].includes(site))
+		array.push(makeUrl("pawchive.pw", site, userId, postId))
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
