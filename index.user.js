@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.9.0
+// @version       1.9.1
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -248,7 +248,8 @@ function makeUrl(service, site, userId, postId) {
 	};
 }
 function makeUrls(array, site, userId, postId) {
-	array.push(makeUrl("kemono.cr", site, userId, postId), makeUrl("nekohouse.su", site, userId, postId), makeUrl("pawchive.pw", site, userId, postId));
+	array.push(makeUrl("kemono.cr", site, userId, postId), makeUrl("nekohouse.su", site, userId, postId));
+	if (["fanbox", "patreon"].includes(site)) array.push(makeUrl("pawchive.pw", site, userId, postId));
 }
 function normalizeUrl(url) {
 	let normalized = url.trim();
