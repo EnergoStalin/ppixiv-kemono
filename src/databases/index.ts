@@ -12,8 +12,7 @@ import {
 } from "./pawchive"
 
 export interface CreatorData {
-	redirected?: boolean
-	lastUpdate?: string
+	lastUpdate: string
 }
 export type PostData = CreatorData
 
