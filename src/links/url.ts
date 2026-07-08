@@ -25,12 +25,10 @@ export function makeUrls(
 	userId?: number | string,
 	postId?: number | string,
 ) {
-	array.push(
-		makeUrl("kemono.cr", site, userId, postId),
-		makeUrl("nekohouse.su", site, userId, postId),
-	)
+	array.push(makeUrl("kemono.cr", site, userId, postId))
 	if (["fanbox", "patreon"].includes(site))
 		array.push(makeUrl("pawchive.pw", site, userId, postId))
+	array.push(makeUrl("nekohouse.su", site, userId, postId))
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
