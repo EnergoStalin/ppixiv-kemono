@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.9.3
+// @version       1.9.4
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -63,15 +63,25 @@ function _getCreatorData$3() {
 			timeout: 5e3
 		});
 		switch (response.status) {
-			case 200: return { lastUpdate: JSON.parse(response.responseText).updated.split("T")[0] };
+			case 200: {
+				const date = JSON.parse(response.responseText).updated.split("T")[0];
+				if (!date) throw new Error("Date");
+				return { lastUpdate: date };
+			}
 			case 0: throw new Error("Timeout");
-			default: throw new Error(`${response.status}`);
 		}
+		throw new Error(`${response.status}`);
 	});
 	return _getCreatorData$3.apply(this, arguments);
 }
 function getPostData$2(u) {
 	return getCreatorData$3(u);
+}
+//#endregion
+//#region src/databases/common.ts
+function handleLastUpdateError(lastUpdate) {
+	if (!lastUpdate) throw new Error("Update");
+	return lastUpdate;
 }
 //#endregion
 //#region \0@oxc-project+runtime@0.137.0/helpers/esm/typeof.js
@@ -170,23 +180,31 @@ function _fetchPage() {
 	});
 	return _fetchPage.apply(this, arguments);
 }
-function getCreatorData$2(_x3) {
+function getData(_x3, _x4) {
+	return _getData.apply(this, arguments);
+}
+function _getData() {
+	_getData = _asyncToGenerator(function* (url, regex) {
+		var _html$match;
+		return { lastUpdate: handleLastUpdateError((_html$match = (yield fetchPage(url, REQUEST_TIMEOUT)).match(regex)) === null || _html$match === void 0 || (_html$match = _html$match[1]) === null || _html$match === void 0 ? void 0 : _html$match.split(" ")[0]) };
+	});
+	return _getData.apply(this, arguments);
+}
+function getCreatorData$2(_x5) {
 	return _getCreatorData$2.apply(this, arguments);
 }
 function _getCreatorData$2() {
 	_getCreatorData$2 = _asyncToGenerator(function* (url) {
-		var _html$match;
-		return { lastUpdate: (_html$match = (yield fetchPage(url, REQUEST_TIMEOUT)).match(CREATOR_LAST_UPDATE_TIME_REGEX)) === null || _html$match === void 0 || (_html$match = _html$match[1]) === null || _html$match === void 0 ? void 0 : _html$match.split(" ")[0] };
+		return yield getData(url, CREATOR_LAST_UPDATE_TIME_REGEX);
 	});
 	return _getCreatorData$2.apply(this, arguments);
 }
-function getPostData$1(_x4) {
+function getPostData$1(_x6) {
 	return _getPostData.apply(this, arguments);
 }
 function _getPostData() {
 	_getPostData = _asyncToGenerator(function* (url) {
-		var _html$match2;
-		return { lastUpdate: (_html$match2 = (yield fetchPage(url, REQUEST_TIMEOUT)).match(POST_LAST_UPDATE_TIME_REGEX)) === null || _html$match2 === void 0 || (_html$match2 = _html$match2[1]) === null || _html$match2 === void 0 ? void 0 : _html$match2.split(" ")[0] };
+		return yield getData(url, POST_LAST_UPDATE_TIME_REGEX);
 	});
 	return _getPostData.apply(this, arguments);
 }
@@ -209,10 +227,10 @@ function _getCreatorData$1() {
 			timeout: 5e3
 		});
 		switch (response.status) {
-			case 200: return { lastUpdate: JSON.parse(response.responseText).updated.split("T")[0] };
+			case 200: return { lastUpdate: handleLastUpdateError(JSON.parse(response.responseText).updated.split("T")[0]) };
 			case 0: throw new Error("Timeout");
-			default: throw new Error(`${response.status}`);
 		}
+		throw new Error(`${response.status}`);
 	});
 	return _getCreatorData$1.apply(this, arguments);
 }
@@ -248,8 +266,9 @@ function makeUrl(service, site, userId, postId) {
 	};
 }
 function makeUrls(array, site, userId, postId) {
-	array.push(makeUrl("kemono.cr", site, userId, postId), makeUrl("nekohouse.su", site, userId, postId));
 	if (["fanbox", "patreon"].includes(site)) array.push(makeUrl("pawchive.pw", site, userId, postId));
+	array.push(makeUrl("kemono.cr", site, userId, postId));
+	array.push(makeUrl("nekohouse.su", site, userId, postId));
 }
 function normalizeUrl(url) {
 	let normalized = url.trim();
@@ -296,34 +315,30 @@ function notifyUserUpdated(userId) {
 }
 //#endregion
 //#region src/avalibility.ts
-const avalibilityInfo = {};
-const pendingRequests = /* @__PURE__ */ new Set();
-function cacheRequest(_x) {
-	return _cacheRequest.apply(this, arguments);
-}
-function _cacheRequest() {
-	_cacheRequest = _asyncToGenerator(function* (url) {
-		pendingRequests.add(url);
-		try {
-			avalibilityInfo[url] = { lastUpdate: (yield getCreatorData(url)).lastUpdate };
-		} catch (error) {
-			avalibilityInfo[url] = { error: `${error}` };
-		} finally {
-			pendingRequests.delete(url);
-		}
-	});
-	return _cacheRequest.apply(this, arguments);
-}
-function updateLinks(links) {
-	for (const l of links) {
-		const request = avalibilityInfo[l.url.toString()];
-		if (request === void 0) l.disabled = true;
-		else if (request.error) {
-			l.label += ` (${clampString(request.error, 15)})`;
-			l.disabled = true;
-		} else l.label += ` (${request.lastUpdate})`;
+function requestCacher(request) {
+	const pending = /* @__PURE__ */ new Set();
+	const cache = {};
+	function _request(url, after) {
+		if (pending.has(url)) return;
+		pending.add(url);
+		request(url).then((r) => cache[url] = { lastUpdate: r }).catch((e) => (console.error(e), cache[url] = { error: `${e}` })).finally(() => (pending.delete(url), after()));
 	}
-	return links;
+	return function(url, after) {
+		const result = cache[url];
+		if (result !== void 0) {
+			if (result.error !== void 0) _request(url, after);
+			return result;
+		}
+		_request(url, after);
+	};
+}
+function updateLink(link, cache) {
+	const request = cache[link.url.toString()];
+	if (request === void 0) link.disabled = true;
+	else if (request.error) {
+		link.label += ` (${clampString(request.error, 15)})`;
+		link.disabled = true;
+	} else link.label += ` (${request.lastUpdate})`;
 }
 function clampString(s, max) {
 	let end = s.length;
@@ -334,14 +349,15 @@ function clampString(s, max) {
 	}
 	return s.slice(0, Math.max(0, end)) + postfix;
 }
+const cache = requestCacher((url) => getCreatorData(url).then((e) => e.lastUpdate));
 function updateAvalibility(links, userId) {
+	const cached = {};
 	for (const link of links) {
 		const url = link.url.toString();
-		const request = avalibilityInfo[url];
-		if (pendingRequests.has(url) || request && request.error === void 0) continue;
-		cacheRequest(url).then(() => notifyUserUpdated(userId)).catch(console.error);
+		cached[url] = cache(url, () => notifyUserUpdated(userId));
+		updateLink(link, cached);
 	}
-	return updateLinks(links);
+	return links;
 }
 //#endregion
 //#region src/links/memo.ts
@@ -380,7 +396,7 @@ const memoizedRegexRequest = memoize(function() {
 		}).then((r) => {
 			var _anyFirstMatch;
 			return (_anyFirstMatch = anyFirstMatch(r.responseText, regexes)) !== null && _anyFirstMatch !== void 0 ? _anyFirstMatch : _default;
-		}).catch(console.log);
+		}).catch(console.error);
 	});
 	return function(_x, _x2) {
 		return _ref.apply(this, arguments);
