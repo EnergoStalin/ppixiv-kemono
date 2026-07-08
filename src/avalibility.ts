@@ -6,39 +6,48 @@ interface CachedRequest {
 	lastUpdate?: string
 }
 
-const avalibilityInfo: Record<string, CachedRequest> = {}
-const pendingRequests: Set<string> = new Set()
-async function cacheRequest(url: string) {
-	pendingRequests.add(url)
-	try {
-		const data = await getCreatorData(url)
-		avalibilityInfo[url] = {
-			lastUpdate: data.lastUpdate,
+function requestCacher(request: (url: string) => Promise<string>) {
+	const pending: Set<string> = new Set()
+	const cache: Record<string, CachedRequest> = {}
+
+	function _request(url: string, after: () => void) {
+		if (pending.has(url))
+			return
+
+		pending.add(url)
+
+		request(url)
+			.then((r) => (cache[url] = { lastUpdate: r }))
+			.catch((e: Error) => (console.error(e), cache[url] = { error: `${e}` }))
+			.finally(() => (pending.delete(url), after()))
+	}
+
+	return function(url: string, after: () => void) {
+		const result = cache[url]
+		if (result !== undefined) {
+			if (result.error !== undefined) {
+				_request(url, after)
+			}
+			return result
 		}
-	} catch (error) {
-		avalibilityInfo[url] = {
-			error: `${error}`,
-		}
-	} finally {
-		pendingRequests.delete(url)
+
+		_request(url, after)
+
+		return
 	}
 }
 
-export function updateLinks(links: UserLink[]) {
-	for (const l of links) {
-		const url = l.url.toString()
-		const request = avalibilityInfo[url]
-		if (request === undefined) {
-			l.disabled = true
-		} else if (request.error) {
-			l.label += ` (${clampString(request.error, 15)})`
-			l.disabled = true
-		} else {
-			l.label += ` (${request.lastUpdate})`
-		}
+export function updateLink(link: UserLink, cache: Record<string, CachedRequest | undefined>) {
+	const url = link.url.toString()
+	const request = cache[url]
+	if (request === undefined) {
+		link.disabled = true
+	} else if (request.error) {
+		link.label += ` (${clampString(request.error, 15)})`
+		link.disabled = true
+	} else {
+		link.label += ` (${request.lastUpdate})`
 	}
-
-	return links
 }
 
 function clampString(s: string, max: number) {
@@ -53,16 +62,15 @@ function clampString(s: string, max: number) {
 	return s.slice(0, Math.max(0, end)) + postfix
 }
 
+const cache = requestCacher((url) => getCreatorData(url).then(e => e.lastUpdate))
+
 export function updateAvalibility(links: UserLink[], userId: number) {
+	const cached: Record<string, CachedRequest | undefined> = {}
 	for (const link of links) {
 		const url = link.url.toString()
-		const request = avalibilityInfo[url]
-		if (pendingRequests.has(url) || (request && request.error === undefined)) {
-			continue
-		}
-
-		cacheRequest(url).then(() => notifyUserUpdated(userId)).catch(console.error)
+		cached[url] = cache(url, () => notifyUserUpdated(userId))
+		updateLink(link, cached)
 	}
 
-	return updateLinks(links)
+	return links
 }
