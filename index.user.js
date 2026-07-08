@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.9.1
+// @version       1.9.2
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -335,13 +335,12 @@ function clampString(s, max) {
 	return s.slice(0, Math.max(0, end)) + postfix;
 }
 function updateAvalibility(links, userId) {
-	const pending = links.map((e) => e.url.toString()).filter((url) => {
+	for (const link of links) {
+		const url = link.url.toString();
 		const request = avalibilityInfo[url];
-		return !pendingRequests.has(url) && (request === void 0 || request.error !== void 0);
-	}).map((url) => cacheRequest(url));
-	Promise.all(pending).then((e) => {
-		if (e.length > 0) notifyUserUpdated(userId);
-	}).catch(console.error);
+		if (pendingRequests.has(url) || request && request.error === void 0) continue;
+		cacheRequest(url).then(() => notifyUserUpdated(userId)).catch(console.error);
+	}
 	return updateLinks(links);
 }
 //#endregion
