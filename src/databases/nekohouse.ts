@@ -1,4 +1,5 @@
 import { CreatorData, PostData } from "."
+import { handleLastUpdateError } from "./common"
 
 const CREATOR_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
 const POST_LAST_UPDATE_TIME_REGEX = /datetime="(.+)?"/
@@ -37,20 +38,19 @@ async function fetchPage(url: string, timeout: number): Promise<string> {
 	}
 }
 
-export async function getCreatorData(url: string): Promise<CreatorData> {
+export async function getData(url: string, regex: RegExp) {
 	const html = await fetchPage(url, REQUEST_TIMEOUT)
+	const lastUpdate = html
+		.match(regex)?.[1]
+		?.split(" ")[0]
 
-	return {
-		lastUpdate: html
-			.match(CREATOR_LAST_UPDATE_TIME_REGEX)?.[1]
-			?.split(" ")[0],
-	}
+	return { lastUpdate: handleLastUpdateError(lastUpdate) }
+}
+
+export async function getCreatorData(url: string): Promise<CreatorData> {
+	return await getData(url, CREATOR_LAST_UPDATE_TIME_REGEX)
 }
 
 export async function getPostData(url: string): Promise<PostData> {
-	const html = await fetchPage(url, REQUEST_TIMEOUT)
-
-	return {
-		lastUpdate: html.match(POST_LAST_UPDATE_TIME_REGEX)?.[1]?.split(" ")[0],
-	}
+	return await getData(url, POST_LAST_UPDATE_TIME_REGEX)
 }

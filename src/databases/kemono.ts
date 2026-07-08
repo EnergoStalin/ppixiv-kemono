@@ -28,15 +28,17 @@ export async function getCreatorData(u: string): Promise<CreatorData> {
 	switch (response.status) {
 		case 200: {
 			const data: KemonoCreator = JSON.parse(response.responseText)
-			return {
-				lastUpdate: data.updated.split("T")[0],
-			}
+			const date = data.updated.split("T")[0]
+
+			if (!date) throw new Error("Date")
+
+			return { lastUpdate: date }
 		}
 		case 0:
 			throw new Error("Timeout")
-		default:
-			throw new Error(`${response.status}`)
 	}
+
+	throw new Error(`${response.status}`)
 }
 
 export function getPostData(u: string): Promise<PostData> {

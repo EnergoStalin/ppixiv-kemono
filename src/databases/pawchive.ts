@@ -1,3 +1,4 @@
+import { handleLastUpdateError } from "./common"
 import { CreatorData, PostData } from "./index"
 
 export interface PawchiveCreator {
@@ -27,15 +28,13 @@ export async function getCreatorData(u: string): Promise<CreatorData> {
 	switch (response.status) {
 		case 200: {
 			const data: PawchiveCreator = JSON.parse(response.responseText)
-			return {
-				lastUpdate: data.updated.split("T")[0],
-			}
+			return { lastUpdate: handleLastUpdateError(data.updated.split("T")[0]) }
 		}
 		case 0:
 			throw new Error("Timeout")
-		default:
-			throw new Error(`${response.status}`)
 	}
+
+	throw new Error(`${response.status}`)
 }
 
 export function getPostData(u: string): Promise<PostData> {
