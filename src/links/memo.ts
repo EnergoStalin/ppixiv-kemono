@@ -52,6 +52,6 @@ export const memoizedRegexRequest = memoize(
 			url,
 		})
 			.then((r) => anyFirstMatch(r.responseText, regexes) ?? _default)
-			.catch(console.log)
+			.catch(console.error)
 	},
 )
