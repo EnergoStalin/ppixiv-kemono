@@ -54,24 +54,15 @@ function clampString(s: string, max: number) {
 }
 
 export function updateAvalibility(links: UserLink[], userId: number) {
-	const pending = links
-		.map((e) => e.url.toString())
-		.filter((url) => {
-			const request = avalibilityInfo[url]
-			return (
-				!pendingRequests.has(url) &&
-				(request === undefined || request.error !== undefined)
-			)
-		})
-		.map((url) => cacheRequest(url))
+	for (const link of links) {
+		const url = link.url.toString()
+		const request = avalibilityInfo[url]
+		if (pendingRequests.has(url) || (request && request.error === undefined)) {
+			continue
+		}
 
-	Promise.all(pending)
-		.then((e) => {
-			if (e.length > 0) {
-				notifyUserUpdated(userId)
-			}
-		})
-		.catch(console.error)
+		cacheRequest(url).then(() => notifyUserUpdated(userId)).catch(console.error)
+	}
 
 	return updateLinks(links)
 }
