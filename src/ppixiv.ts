@@ -1,7 +1,7 @@
 import { normalizeUrl } from "./links/url"
 
 // eslint-disable-next-line no-useless-escape
-const BODY_LINK_REGEX = /[\W\s]((?:https?:\/\/)?(?:\w+[\.\/])+(?:\w?)+)/g
+const BODY_LINK_REGEX = /[\W\s]?((?:https?:\/\/)?(?:[a-zA-Z-0-9_\-]+[\.\/])+(?:\w?)+)/g
 
 const labelMatchingMap = {
 	patreon: "patreon.com",
