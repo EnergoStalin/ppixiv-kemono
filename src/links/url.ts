@@ -33,8 +33,9 @@ export function makeUrls(
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function normalizeUrl(url: string) {
-	let normalized = url.trim()
-	if (!normalized.startsWith("http")) normalized = `https://${normalized}`
+	let normalized = new URL(url.trim())
+
+	normalized.protocol = "https"
 
 	return normalized
 }

@@ -2,10 +2,15 @@ import { memoizedRegexRequest } from "./memo"
 import { makeUrls, normalizeUrl } from "./url"
 
 function normalizePatreonLink(link: UserLink) {
-	if (typeof link.url === "string") link.url = new URL(normalizeUrl(link.url))
+	if (typeof link.url === "string") link.url = normalizeUrl(link.url)
 
 	link.url.protocol = "https"
-	if (!link.url.host.startsWith("www.")) link.url.host = `www.${link.url.host}`
+	let host = link.url.host
+
+	if (!host.startsWith("www.")) host = `www.${host}`
+	if (!host.endsWith(".com")) host = `${host.replace(/.$/m, "")}.com`
+
+	link.url.host = host
 }
 
 const PATREON_ID_REGEXES = [

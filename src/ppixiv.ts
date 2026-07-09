@@ -14,7 +14,7 @@ const labelMatchingMap = {
 export function preprocessMatches(matches: string[]): (UserLink | undefined)[] {
 	return matches.map((e) => {
 		try {
-			const url = new URL(normalizeUrl(e))
+			const url = normalizeUrl(e)
 			return {
 				label: labelMatchingMap[
 					Object.entries(labelMatchingMap).find(
