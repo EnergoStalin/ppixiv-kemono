@@ -3,7 +3,7 @@
 // @author        EnergoStalin
 // @description   Add kemono.su patreon & fanbox & fantia links into ppixiv
 // @license       AGPL-3.0-only
-// @version       1.9.4
+// @version       1.9.5
 // @namespace     https://pixiv.net
 // @match         https://*.pixiv.net/*
 // @run-at        document-body
@@ -271,8 +271,8 @@ function makeUrls(array, site, userId, postId) {
 	array.push(makeUrl("nekohouse.su", site, userId, postId));
 }
 function normalizeUrl(url) {
-	let normalized = url.trim();
-	if (!normalized.startsWith("http")) normalized = `https://${normalized}`;
+	let normalized = new URL(url.trim());
+	normalized.protocol = "https";
 	return normalized;
 }
 //#endregion
@@ -288,7 +288,7 @@ const labelMatchingMap = {
 function preprocessMatches(matches) {
 	return matches.map((e) => {
 		try {
-			const url = new URL(normalizeUrl(e));
+			const url = normalizeUrl(e);
 			return {
 				label: labelMatchingMap[Object.entries(labelMatchingMap).find(([k, v]) => url.host.includes(v) || url.host.includes(k))[0]],
 				url
@@ -452,9 +452,12 @@ function gumroad(link, extraLinks, userId) {
 //#endregion
 //#region src/links/patreon.ts
 function normalizePatreonLink(link) {
-	if (typeof link.url === "string") link.url = new URL(normalizeUrl(link.url));
+	if (typeof link.url === "string") link.url = normalizeUrl(link.url);
 	link.url.protocol = "https";
-	if (!link.url.host.startsWith("www.")) link.url.host = `www.${link.url.host}`;
+	let host = link.url.host;
+	if (!host.startsWith("www.")) host = `www.${host}`;
+	if (!host.endsWith(".com")) host = `${host.replace(/.$/m, "")}.com`;
+	link.url.host = host;
 }
 const PATREON_ID_REGEXES = [/* @__PURE__ */ new RegExp("\"creator\":{\"data\":{\"id\":\"(\\d+)\"", "s"), /* @__PURE__ */ new RegExp("https:\\/\\/www\\.patreon\\.com\\/api\\/user\\/(\\d+)", "s")];
 function patreon(link, extraLinks, userId) {
